@@ -1,115 +1,13 @@
-from torchvision.datasets.folder import ImageFolder, IMG_EXTENSIONS, default_loader
+from torchvision.datasets.folder import ImageFolder
+from torch.utils.data import Dataset
 import os
 import numpy as np
-import PIL
-import requests
-from tqdm import tqdm
-import tarfile
 from PIL import Image
 import torch
-
-waterbirds_class_list = [
-    "bamboo_forest",
-    #     'forest/broadleaf',  # Land backgrounds
-    "ocean",
-    #     'lake/natural'
-]
-
-celeba_class_list = [
-    "black_hair",
-    "blond_hair",
-]
+import yaml
 
 
-dogs_class_list = [
-    "field_wild",
-    "blond_hair",
-]
-
-cat_dog_back_class_list = [
-    "canyon",
-    "islet",
-]
-
-minor_cat_dog_back_class_list = [
-    "islet",
-    "canyon",
-]
-
-flowers17_back_class_list = [
-    "badlands",
-    "bamboo_forest",
-    "butte",
-    "canyon",
-    "crevasse",
-    "dam",
-    "islet",
-    "rock_arch",
-    "tree_farm",
-    "wind_farm",
-]
-
-oxford_iiit_pet_back_class_list = [
-    "abbey",
-    "airport_terminal",
-    "alley",
-    "amphitheater",
-    "amusement_park",
-    "aquarium",
-    "aqueduct",
-    "arch",
-    "art_gallery",
-    "art_studio",
-    "assembly_line",
-    "attic",
-    "badlands",
-    "ballroom",
-    "bamboo_forest",
-    "banquet_hall",
-    "bar",
-    "baseball_field",
-    "basement",
-    "basilica",
-    "bayou",
-    "beauty_salon",
-    "bedroom",
-    "boardwalk",
-    "boat_deck",
-    "bookstore",
-    "botanical_garden",
-    "bowling_alley",
-    "boxing_ring",
-    "bridge",
-    "building_facade",
-    "bus_interior",
-    "butchers_shop",
-    "cafeteria",
-    "campsite",
-    "candy_store",
-    "canyon",
-    "castle",
-    "cemetery",
-    "chalet",
-    "classroom",
-    "closet",
-    "clothing_store",
-    "coast",
-    "cockpit",
-    "coffee_shop",
-    "conference_center",
-    "conference_room",
-    "construction_site",
-    "corn_field",
-    "corridor",
-    "cottage_garden",
-    "courthouse",
-    "courtyard",
-    "creek",
-    "crevasse",
-]
-
-
-class ConceptImageFolder(ImageFolder):
+class ConceptImageFolder(Dataset):
     def __init__(
         self,
         root,
@@ -118,79 +16,39 @@ class ConceptImageFolder(ImageFolder):
         transform=None,
         target_transform=None,
     ):
-        super().__init__(root, transform, target_transform)
+        super().__init__()
+        self.root = root
+        self.transform = transform
+        self.target_transform = target_transform
+        self.samples = self.__yaml_to_img_target__(dataset, nimg_per_concept)
 
-        # self.imgs = self.samples
-        if dataset == "SpuriousFlowers17":
-            self.classes = flowers17_back_class_list
-        elif dataset == "Spuriousoxford-iiit-pet":
-            self.classes = oxford_iiit_pet_back_class_list
-        elif dataset in [
-            "SpuriousCatDog",
-            "NonSpuriousCatDog",
-            "SpuriousCatDogVer2",
-            "SpuriousCatDogVer3",
-        ]:
-            self.classes = cat_dog_back_class_list
-        elif dataset == "Waterbirds":
-            self.classes = waterbirds_class_list
-        elif dataset == "MinorSpuriousCatDog":
-            self.classes = minor_cat_dog_back_class_list
-        elif dataset == "waterbirds_concepts":
-            self.classes = waterbirds_class_list
-        elif dataset == "celeba_concepts":
-            self.classes = celeba_class_list
-        elif dataset == "celeba_concepts2":
-            self.classes = celeba_class_list
+    def __yaml_to_img_target__(self, dataset, nimg_per_concept=50):
+        # yaml file contains a dictionary with keys as concepts and values as list of image paths
+        # this function convert it to a list of tuples (image_path, target)
+        if dataset in ["waterbirds_concepts", "catdog_concepts"]:
+            with open(f"configs/dataset/{dataset}.yaml", "r") as f:
+                data = yaml.load(f, Loader=yaml.FullLoader)
+        else:
+            raise NotImplementedError("dataset is not implemented")
 
-        self.class_to_idx = {name: i for i, name in enumerate(self.classes)}
-        # self.class_to_idx = {name: i for i, name in enumerate(self.classes[:2])}
-        # print required. This function is pre-defined function in the parent class.
-        self.samples = self.make_dataset(
-            self.root, self.class_to_idx, extensions=IMG_EXTENSIONS, is_valid_file=None
-        )
+        samples = []
+        for concept, img_paths in data.items():
+            for img_path in img_paths[:nimg_per_concept]:
+                samples.append((img_path, concept))
+        return samples
 
-        self.samples_post_processing(dataset, nimg_per_concept)
+    def __len__(self):
+        return len(self.nimg_per_concept) * len(self.img_labels.keys())
 
     def __getitem__(self, index: int):
         path, target = self.samples[index]
-        sample = self.loader(path)  # PIL image
+        sample = Image.open(os.path.join(self.root, "data_large", path)).convert("RGB")
         if self.transform is not None:
             sample = self.transform(sample)
         if self.target_transform is not None:
             target = self.target_transform(target)
 
         return sample, target, 0, 0
-
-    def samples_post_processing(self, dataset, nimg_per_concept):
-        if dataset == "SpuriousFlowers17":
-            nstart = 50
-        elif dataset == "Spuriousoxford-iiit-pet":
-            nstart = 200
-        elif dataset in [
-            "SpuriousCatDog",
-            "NonSpuriousCatDog",
-            "SpuriousCatDogVer2",
-            "SpuriousCatDogVer3",
-        ]:
-            nstart = 2400
-        elif dataset in [
-            "Waterbirds",
-            "celeba_concepts",
-            "celeba_concepts2",
-            "waterbirds_concepts",
-            "dogs_concepts",
-        ]:
-            nstart = 0
-        elif dataset == "waterbirds_concepts":
-            nstart = 0
-
-        samples = []
-        for index in self.class_to_idx.values():
-            tmp = [data for data in self.samples if data[1] == index]
-            samples += tmp[nstart : nstart + nimg_per_concept]
-
-        self.samples = samples
 
 
 class SpuriousDataset(ImageFolder):
@@ -302,96 +160,6 @@ class PrepareDataset:
         else:
             self._processing(root)
 
-    def _flower17_download(self, direc):
-        url_img = "https://www.robots.ox.ac.uk/~vgg/data/flowers/17/17flowers.tgz"
-        url_mask = "https://www.robots.ox.ac.uk/~vgg/data/flowers/17/trimaps.tgz"
-
-        _get_data_from_url(url_img, direc, "17flowers.tgz")
-        _get_data_from_url(url_mask, direc, "trimaps.tgz")
-
-        def _get_data_from_url(url, direc, filename):
-            os.makedirs(direc, exist_ok=True)
-            response = requests.get(url, stream=True)
-
-            total_size_in_bytes = int(response.headers.get("content-length", 0))
-            block_size = 1024  # 1 Kibibyte
-            progress_bar = tqdm(total=total_size_in_bytes, unit="iB", unit_scale=True)
-
-            file_path = os.path.join(direc, filename)
-            with open(file_path, "wb") as f:
-                for data in response.iter_content(block_size):
-                    progress_bar.update(len(data))
-                    f.write(data)
-
-            progress_bar.close()
-            if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
-                print("ERROR, something went wrong")
-
-            _untar(direc, filename)
-
-        def _untar(direc, filename):
-            file_path = os.path.join(direc, filename)
-            with tarfile.open(file_path) as f:
-                f.extractall(direc)
-
-    def _get_flower17_img_dict(self, root):
-        from scipy.io import loadmat
-
-        ann = loadmat(os.path.join(root, "trimaps/imlist.mat"))["imlist"].flatten()
-
-        label_list = [
-            0,
-            4,
-            5,
-            8,
-            9,
-            10,
-            12,
-            14,
-            15,
-            16,
-        ]  # each label has 50 or more masks.
-
-        img_dict = {}
-        mask_dict = {}
-        for index, label in enumerate(label_list):
-            img_dict[index] = []
-            mask_dict[index] = []
-            for i in range(80 * label + 1, 80 * (label + 1) + 1):
-                if i in ann:
-                    img_path = os.path.join(root, "jpg", f"image_{str(i).zfill(4)}.jpg")
-                    mask_path = os.path.join(
-                        root, "trimaps", f"image_{str(i).zfill(4)}.png"
-                    )
-
-                    img_dict[index].append(img_path)
-                    mask_dict[index].append(mask_path)
-
-                if len(img_dict[index]) == 50:
-                    break
-
-        return img_dict, mask_dict
-
-    def _get_oxford_iiit_pet_img_dict(self, root):
-        img_path = os.path.join(root, "images")
-        mask_path = os.path.join(root, "annotations/trimaps")
-
-        img_list = sorted([i for i in os.listdir(img_path) if "._" not in i])
-        mask_list = sorted([i for i in os.listdir(mask_path) if "._" not in i])
-
-        class_list = set(["_".join(i.split("_")[:-1]) for i in img_list])
-
-        img_dict = {
-            i: [img_path + "/" + f for f in img_list if label in f]
-            for i, label in enumerate(sorted(list(class_list)))
-        }
-        mask_dict = {
-            i: [mask_path + "/" + f for f in mask_list if label in f]
-            for i, label in enumerate(sorted(list(class_list)))
-        }
-
-        return img_dict, mask_dict
-
     def _get_cat_dog_img_dict(self, root):
         img_dict, mask_dict = self._get_oxford_iiit_pet_img_dict(root)
 
@@ -418,19 +186,7 @@ class PrepareDataset:
         )
         save_root = os.path.join(root, self.dataset)
 
-        if self.dataset == "SpuriousFlowers17":
-            img_dict, mask_dict = self._get_flower17_img_dict(
-                os.path.join(root, "Flowers17")
-            )
-            back_class_list = flowers17_back_class_list
-
-        elif self.dataset == "Spuriousoxford-iiit-pet":
-            img_dict, mask_dict = self._get_oxford_iiit_pet_img_dict(
-                os.path.join(root, "oxford-iiit-pet")
-            )
-            back_class_list = oxford_iiit_pet_back_class_list
-
-        elif self.dataset == "SpuriousCatDog":
+        if self.dataset == "SpuriousCatDog":
             img_dict, mask_dict = self._get_cat_dog_img_dict(
                 os.path.join(root, "oxford-iiit-pet")
             )
@@ -441,12 +197,6 @@ class PrepareDataset:
                 os.path.join(root, "oxford-iiit-pet")
             )
             back_class_list = cat_dog_back_class_list
-
-        elif self.dataset == "MinorSpuriousCatDog":
-            img_dict, mask_dict = self._get_cat_dog_img_dict(
-                os.path.join(root, "oxford-iiit-pet")
-            )
-            back_class_list = minor_cat_dog_back_class_list
 
         num_classes = len(img_dict)
         for label, (img_list, mask_list) in enumerate(

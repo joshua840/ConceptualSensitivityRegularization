@@ -10,17 +10,8 @@ class MyLightningCLI(LightningCLI):
 
 def cli_main():
     cli = MyLightningCLI(run=False)
+
     cli.trainer.fit(cli.model)
-
-    # cli.trainer.fit(cli.model)
-    # LitFeatureJTTMetadataGenerator
-
-    # model = JTTMetadataGenerator(**vars(args))
-    # model.prepare_data()
-    # model.setup()
-    # train_loader = model.train_dataloader()
-    # train_loader2 = model.jtt_generation_dataloader()
-    # trainer.fit(model, train_dataloaders=train_loader, val_dataloaders=train_loader2)
 
 
 if __name__ == "__main__":

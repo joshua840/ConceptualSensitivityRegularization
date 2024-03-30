@@ -1,15 +1,6 @@
 import os
-import torch
-import pandas as pd
-import numpy as np
-
 from PIL import Image
 from torchvision import transforms
-
-# from transformers import BertTokenizer
-from torch.utils.data import DataLoader
-from sklearn.datasets import make_blobs
-import pandas as pd
 from .balancing_group_dataset import GroupDataset
 
 
@@ -63,19 +54,15 @@ class Waterbirds(GroupDataset):
         for attr in range(2):
             for label in range(2):
                 indices_dict[(attr, label)] = (
-                    ((self.g == attr) * (self.y == label)).nonzero()[0].squeeze()
+                    ((self.attr == attr) * (self.y == label)).nonzero()[0].squeeze()
                 )
         return indices_dict
 
     @staticmethod
-    def _remove_label_bias(indices_dict):
+    def _set_minor_ratio(indices_dict, minor_ratio):
+        new_length = int(len(indices_dict[(1, 1)]) * minor_ratio)
+        indices_dict[(0, 1)] = indices_dict[(0, 1)][:new_length]
+
+        new_length = int(len(indices_dict[(0, 0)]) * minor_ratio)
+        indices_dict[(1, 0)] = indices_dict[(1, 0)][:new_length]
         return indices_dict
-
-    @staticmethod
-    def _set_minor_ratio(indices_selector_dict, minor_ratio):
-        new_length = int(len(indices_selector_dict[(1, 1)]) * minor_ratio)
-        indices_selector_dict[(0, 1)] = indices_selector_dict[(0, 1)][:new_length]
-
-        new_length = int(len(indices_selector_dict[(0, 0)]) * minor_ratio)
-        indices_selector_dict[(1, 0)] = indices_selector_dict[(1, 0)][:new_length]
-        return indices_selector_dict

@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 
 from .models import load_model_ver2
-from .dataset.metrics import Metrics
+from .utils.metrics import Metrics
 from .datamodule import DataModule
 
 import typing
@@ -73,9 +73,9 @@ class ERM(DataModule):
 
         self.model = load_model_ver2(
             model=self.hparams.model,
-            num_classes=1
-            if self.hparams.criterion == "bce"
-            else self.hparams.num_classes,
+            num_classes=(
+                1 if self.hparams.criterion == "bce" else self.hparams.num_classes
+            ),
             imagenet_pretrained=self.hparams.imagenet_pretrained,
             model_h_activation_fn=self.hparams.h_activation_fn,
             model_h_softplus_beta=self.hparams.h_softplus_beta,

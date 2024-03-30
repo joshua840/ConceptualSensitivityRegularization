@@ -5,6 +5,7 @@ from tqdm import tqdm
 import tarfile
 from PIL import Image
 import pandas as pd
+import yaml
 
 
 def crop_and_resize(source_img, target_img):
@@ -115,34 +116,41 @@ class PrepareDataset:
     This class will check whether the dataset is exist or not.
     """
 
-    def __init__(self, root="~/Data", dataset="SpuriousCatDogVer3", download=False):
+    def __init__(
+        self,
+        places365_root,
+        save_root,
+        oxford_iiit_pet_root="~/Data",
+        dataset="SpuriousCatDog",
+        download=False,
+    ):
         self.dataset = dataset
-        if os.path.isdir(os.path.join(root, self.dataset)):
+        if os.path.isdir(os.path.join(save_root, self.dataset)):
             print(f"{self.dataset} dataset is already prepared")
             return
         else:
-            self.bg_dir = os.path.join(
-                root, "Places205/data/vision/torralba/deeplearning/images256"
+            self.bg_dir = os.path.join(places365_root, "Places365/data_large")
+            self.fg_dir = os.path.join(oxford_iiit_pet_root, "oxford-iiit-pet/images")
+            self.mask_dir = os.path.join(
+                oxford_iiit_pet_root, "oxford-iiit-pet/annotations/trimaps"
             )
-            self.fg_dir = os.path.join(root, "oxford-iiit-pet/images")
-            self.mask_dir = os.path.join(root, "oxford-iiit-pet/annotations/trimaps")
 
             if os.path.isdir(self.bg_dir):
-                print("Place205 dataset: exist")
+                print("Places365 dataset: exist")
             else:
-                raise FileNotFoundError("Place205 dataset is not exist.")
+                raise FileNotFoundError("Places365 dataset is not exist.")
 
             if os.path.isdir(self.fg_dir):
                 print("oxford-iiit-pet images: exist")
             else:
                 if download:
-                    self._download_oxford_iiit_pet(root)
+                    self._download_oxford_iiit_pet(oxford_iiit_pet_root)
                 else:
                     raise FileNotFoundError(
                         "You have to download oxford-iiit-pet dataset. Hint: set download=True"
                     )
 
-            return self._processing(root)
+            return self._processing(save_root)
 
     def _download_oxford_iiit_pet(self, root):
         root = os.path.join(root, "oxford-iiit-pet")
@@ -214,12 +222,12 @@ class PrepareDataset:
         df = pd.concat([df, test_df], axis=0)
         df = df.reset_index()
 
-        place0_path = os.path.join(self.bg_dir, "canyon")
-        place1_path = os.path.join(self.bg_dir, "islet")
+        with open("configs/dataset/waterbirds_used_bgs.yaml", "r") as f:
+            config_waterbirds_bg = yaml.load(f, Loader=yaml.FullLoader)
 
         places_dict = {
-            0: sorted(["canyon/" + i for i in os.listdir(place0_path) if ".jpg" in i]),
-            1: sorted(["islet/" + i for i in os.listdir(place1_path) if ".jpg" in i]),
+            0: config_waterbirds_bg["water"],
+            1: config_waterbirds_bg["land"],
         }
 
         df.loc[df["place"] == 0, "place_filename"] = places_dict[0][
@@ -264,27 +272,29 @@ class PrepareDataset:
             img = combine_and_mask(bg, mask_np, fg_only)
 
             # Save img
-            save_filename = f"{row['fg_filename'].split('.')[0]}_{row['place_filename'].split('/')[1]}"
-
+            save_filename = f"{row['fg_filename'].split('.')[0]}_{'_'.join(row['place_filename'].split('/'))}"
+            # print(os.path.join(root, self.dataset, save_filename))
+            # print(row["place_filename"])
             img.save(os.path.join(root, self.dataset, save_filename))
             # row["img_filename"] = save_filename
             df.loc[i, "img_filename"] = save_filename
 
             print(save_filename)
 
+        # metadata.csv contains all information
         df.to_csv(
-            os.path.join(root, self.dataset, "metadata_catdog2.csv"),
+            os.path.join(root, self.dataset, "metadata.csv"),
             index=False,
         )
         df["filename"] = df["img_filename"]
         df["a"] = df["place"]
         df["split"] = df["split"].map({"train": 0, "val": 1, "test": 2})
         df = df[["filename", "split", "y", "a"]]
-        # metadata.csv will be used in the main code
-        df.to_csv(os.path.join(root, self.dataset, "metadata.csv"), index=False)
+        # metadata_catdog.csv will be used by DataModule
+        df.to_csv(os.path.join(root, self.dataset, "metadata_catdog.csv"), index=False)
 
         return
 
 
 if __name__ == "__main__":
-    PrepareDataset(root="/media/disk1/Data", dataset="SpuriousCatDogVer3")
+    PrepareDataset(root="/media/disk1/Data", dataset="SpuriousCatDog")

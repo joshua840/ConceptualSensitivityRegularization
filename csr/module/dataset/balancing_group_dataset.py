@@ -40,8 +40,7 @@ class GroupDataset(CommonSpuriousDataset):
             df["filename"].astype(str).map(lambda x: os.path.join(root, x)).tolist()
         )
         self.y = np.array(df["y"])
-        # TODO: consider changing into self.a
-        self.g = np.array(df["a"])
+        self.attr = np.array(df["a"])
 
         # minor_ratio
         if split == "tr" and minor_ratio is not None:
@@ -63,7 +62,7 @@ class GroupDataset(CommonSpuriousDataset):
     def count_groups(self):
         self.wg, self.wy = [], []
 
-        self.nb_groups = len(set(self.g))
+        self.nb_groups = len(set(self.attr))
         self.nb_labels = len(set(self.y))
         self.group_sizes = {}  # [0] * self.nb_groups * self.nb_labels
         self.class_sizes = [0] * self.nb_labels
@@ -71,7 +70,7 @@ class GroupDataset(CommonSpuriousDataset):
         for g in range(self.nb_groups):
             for y in range(self.nb_labels):
                 self.group_sizes[(g, y)] = (
-                    (self.y[self.i] == y) * (self.g[self.i] == g)
+                    (self.y[self.i] == y) * (self.attr[self.i] == g)
                 ).sum()
                 self.class_sizes.append((self.y[self.i] == y).sum())
 
@@ -87,7 +86,7 @@ class GroupDataset(CommonSpuriousDataset):
         counts_y = [0] * self.nb_labels
         new_i = []
         for p in perm:
-            y, g = self.y[self.i[p]], self.g[self.i[p]]
+            y, g = self.y[self.i[p]], self.attr[self.i[p]]
 
             if (
                 subsample_what == "groups"
@@ -111,7 +110,7 @@ class GroupDataset(CommonSpuriousDataset):
         j = self.i[i]
         x = self.transform(self.x[j])
         y = torch.tensor(self.y[j], dtype=torch.long)
-        g = torch.tensor(self.g[j], dtype=torch.long)
+        g = torch.tensor(self.attr[j], dtype=torch.long)
         return (
             x,
             y,
@@ -122,7 +121,17 @@ class GroupDataset(CommonSpuriousDataset):
     def __len__(self):
         return len(self.i)
 
-    def _group_counts(self):
-        group = self.g
-        _, counts = np.unique(np.array(group), return_counts=True)
-        return torch.tensor(counts)
+    def verbose(self):
+        self.count_groups()
+        print(self.group_sizes)
+
+    def _get_indices_dict(self):
+        raise NotImplementedError()
+
+    @staticmethod
+    def _remove_label_bias(indices_dict):
+        return indices_dict
+
+    @staticmethod
+    def _set_minor_ratio(indices_dict, minor_ratio):
+        return indices_dict

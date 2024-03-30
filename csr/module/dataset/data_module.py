@@ -1,5 +1,4 @@
 import torch
-import os
 
 from torchvision import transforms
 import pytorch_lightning as pl
@@ -8,7 +7,6 @@ import numpy as np
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 import torch
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from typing import Optional, Union, List
 
 # from .parser import str2bool
@@ -18,10 +16,9 @@ from . import (
     CelebAGender,
     Waterbirds,
     ColoredMNIST,
-    ConceptImageFolder,
+    ConceptDataset,
     Dogs,
     CatDog,
-    CatDog2,
 )
 
 
@@ -98,12 +95,11 @@ class DataModule(pl.LightningDataModule):
             "celeba_gender": CelebAGender,
             "waterbirds": Waterbirds,
             "catdog": CatDog,
-            "catdog2": CatDog2,
             "dogs": Dogs,
-            "waterbirds_concepts": ConceptImageFolder,
-            "celeba_concepts": ConceptImageFolder,
-            "dogs_concepts": ConceptImageFolder,
-            "celeba_concepts2": ConceptImageFolder,
+            "waterbirds_concepts": ConceptDataset,
+            "celeba_concepts": ConceptDataset,
+            "dogs_concepts": ConceptDataset,
+            "celeba_concepts2": ConceptDataset,
         }[dataset]
         if dataset in [
             "celeba",
@@ -112,7 +108,6 @@ class DataModule(pl.LightningDataModule):
             "celeba_gender",
             "dogs",
             "catdog",
-            "catdog2",
         ]:
             return self._init_balancing_group(
                 Dataset, data_dir, minor_ratio, subsample_what
@@ -126,11 +121,11 @@ class DataModule(pl.LightningDataModule):
             "celeba_concepts2",
             "dogs_concepts",
         ]:
-            return self._spurious_dataset_group(root=data_dir, dataset=dataset)
+            return self._concept_dataset_group(root=data_dir, dataset=dataset)
         else:
             raise NameError
 
-    def _spurious_dataset_group(self, root, dataset):
+    def _concept_dataset_group(self, root, dataset):
         # dataset
 
         target_resolution = (224, 224)
@@ -154,13 +149,13 @@ class DataModule(pl.LightningDataModule):
             ]
         )
 
-        self.train_dataset = ConceptImageFolder(
+        self.train_dataset = ConceptDataset(
             root=root, dataset=dataset, transform=transform_tr
         )
-        self.val_dataset = ConceptImageFolder(
+        self.val_dataset = ConceptDataset(
             root=root, dataset=dataset, transform=transform_te
         )
-        self.test_dataset = ConceptImageFolder(
+        self.test_dataset = ConceptDataset(
             root=root, dataset=dataset, transform=transform_te
         )
         self.num_classes = 2

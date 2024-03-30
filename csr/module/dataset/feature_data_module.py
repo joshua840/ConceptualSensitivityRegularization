@@ -1,5 +1,4 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from numpy import float128, float16
 import numpy as np
 import os
 
@@ -9,7 +8,7 @@ from torch.utils.data import DataLoader
 
 from torch.utils.data import TensorDataset, DataLoader
 from .common_spurious_dataset import CommonSpuriousDataset
-from . import CelebA, Waterbirds, ColoredMNIST, Dogs, CatDog, CatDog2
+from . import CelebA, Waterbirds, ColoredMNIST, Dogs, CatDog
 
 
 class EpochChangeableFeatureDataset(CommonSpuriousDataset):
@@ -120,7 +119,6 @@ class EpochChangeableFeatureDataset(CommonSpuriousDataset):
             "waterbirds": Waterbirds._set_minor_ratio,
             "dogs": Dogs._set_minor_ratio,
             "catdog": CatDog._set_minor_ratio,
-            "catdog2": CatDog2._set_minor_ratio,
             # "isic": ISICDatasetVer3._set_minor_ratio,
             # "plant": PlantRGBDataset._set_minor_ratio,
         }[self.dataset_name]
@@ -143,6 +141,7 @@ class EpochChangeableFeatureDataset(CommonSpuriousDataset):
         return len(self.i)
 
     def _group_counts(self):
+        # TODO: Meaningless code
         group = self.g
         _, counts = np.unique(np.array(group), return_counts=True)
         return torch.tensor(counts)

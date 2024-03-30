@@ -1,20 +1,14 @@
 import os
-import torch
-import pandas as pd
-import numpy as np
-
 from PIL import Image
 from torchvision import transforms
-
-# from transformers import BertTokenizer
-from torch.utils.data import DataLoader
-from sklearn.datasets import make_blobs
 import pandas as pd
 from .balancing_group_dataset import GroupDataset
 
 
 class CelebA(GroupDataset):
-    def __init__(self, data_dir, split, subsample_what=None, duplicates=None, minor_ratio=None):
+    def __init__(
+        self, data_dir, split, subsample_what=None, duplicates=None, minor_ratio=None
+    ):
         root = os.path.join(data_dir, "celeba/img_align_celeba/")
         metadata = os.path.join(data_dir, "metadata_celeba.csv")
 
@@ -33,7 +27,10 @@ class CelebA(GroupDataset):
             transform = transforms.Compose(
                 [
                     transforms.RandomResizedCrop(
-                        target_resolution, scale=(0.7, 1.0), ratio=(0.75, 1.33333333), interpolation=2
+                        target_resolution,
+                        scale=(0.7, 1.0),
+                        ratio=(0.75, 1.33333333),
+                        interpolation=2,
                     ),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(),
@@ -41,7 +38,9 @@ class CelebA(GroupDataset):
                 ]
             )
 
-        super().__init__(split, root, metadata, transform, subsample_what, duplicates, minor_ratio)
+        super().__init__(
+            split, root, metadata, transform, subsample_what, duplicates, minor_ratio
+        )
         self.data_type = "images"
         self._num_classes = 2
         self._num_groups = 4
@@ -53,7 +52,9 @@ class CelebA(GroupDataset):
         indices_dict = {}
         for attr in range(2):
             for label in range(2):
-                indices_dict[(attr, label)] = ((self.g == attr) * (self.y == label)).nonzero()[0].squeeze()
+                indices_dict[(attr, label)] = (
+                    ((self.attr == attr) * (self.y == label)).nonzero()[0].squeeze()
+                )
         return indices_dict
 
     @staticmethod
@@ -79,7 +80,9 @@ class CelebA(GroupDataset):
 
 
 class CelebAGender(GroupDataset):
-    def __init__(self, data_dir, split, subsample_what=None, duplicates=None, minor_ratio=None):
+    def __init__(
+        self, data_dir, split, subsample_what=None, duplicates=None, minor_ratio=None
+    ):
         root = os.path.join(data_dir, "celeba/img_align_celeba/")
         metadata = os.path.join(data_dir, "metadata_celeba.csv")
 
@@ -98,7 +101,10 @@ class CelebAGender(GroupDataset):
             transform = transforms.Compose(
                 [
                     transforms.RandomResizedCrop(
-                        target_resolution, scale=(0.7, 1.0), ratio=(0.75, 1.33333333), interpolation=2
+                        target_resolution,
+                        scale=(0.7, 1.0),
+                        ratio=(0.75, 1.33333333),
+                        interpolation=2,
                     ),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(),
@@ -106,7 +112,9 @@ class CelebAGender(GroupDataset):
                 ]
             )
 
-        super().__init__(split, root, metadata, transform, subsample_what, duplicates, minor_ratio)
+        super().__init__(
+            split, root, metadata, transform, subsample_what, duplicates, minor_ratio
+        )
         self.data_type = "images"
         self._num_classes = 2
         self._num_groups = 4
@@ -118,7 +126,9 @@ class CelebAGender(GroupDataset):
         indices_dict = {}
         for attr in range(2):
             for label in range(2):
-                indices_dict[(attr, label)] = ((self.g == attr) * (self.y == label)).nonzero()[0].squeeze()
+                indices_dict[(attr, label)] = (
+                    ((self.attr == attr) * (self.y == label)).nonzero()[0].squeeze()
+                )
         return indices_dict
 
     @staticmethod

@@ -27,5 +27,5 @@ class CommonSpuriousDataset(Dataset):
     def num_groups(self) -> int:
         raise NotImplementedError()
 
-    def _group_counts(self) -> List:
-        pass
+    def verbose(self):
+        raise NotImplementedError()

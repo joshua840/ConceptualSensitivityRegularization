@@ -17,10 +17,9 @@ from .dataset import (
     CelebAGender,
     Waterbirds,
     ColoredMNIST,
-    ConceptImageFolder,
+    ConceptDataset,
     Dogs,
     CatDog,
-    CatDog2,
 )
 
 
@@ -99,13 +98,12 @@ class DataModule(pl.LightningModule):
             "celeba_gender": CelebAGender,
             "waterbirds": Waterbirds,
             "catdog": CatDog,
-            "catdog2": CatDog2,
             "dogs": Dogs,
-            "waterbirds_concepts": ConceptImageFolder,
-            "celeba_concepts": ConceptImageFolder,
-            "dogs_concepts": ConceptImageFolder,
-            "catdog_concepts": ConceptImageFolder,
-            "celeba_concepts2": ConceptImageFolder,
+            "waterbirds_concepts": ConceptDataset,
+            "celeba_concepts": ConceptDataset,
+            "dogs_concepts": ConceptDataset,
+            "catdog_concepts": ConceptDataset,
+            "celeba_concepts2": ConceptDataset,
         }[self.hparams.dataset]
         if self.hparams.dataset in [
             "celeba",
@@ -114,7 +112,6 @@ class DataModule(pl.LightningModule):
             "celeba_gender",
             "dogs",
             "catdog",
-            "catdog2",
         ]:
             return self._init_balancing_group(
                 Dataset,
@@ -164,13 +161,13 @@ class DataModule(pl.LightningModule):
             ]
         )
 
-        self.train_dataset = ConceptImageFolder(
+        self.train_dataset = ConceptDataset(
             root=root, dataset=dataset, transform=transform_tr
         )
-        self.val_dataset = ConceptImageFolder(
+        self.val_dataset = ConceptDataset(
             root=root, dataset=dataset, transform=transform_te
         )
-        self.test_dataset = ConceptImageFolder(
+        self.test_dataset = ConceptDataset(
             root=root, dataset=dataset, transform=transform_te
         )
         self.num_classes = 2
@@ -314,7 +311,6 @@ class DataModule(pl.LightningModule):
             "waterbirds": (3.31, 2, 4),
             "colored_mnist": (1.0, 10, 10),
             "catdog": (1, 2, 4),
-            "catdog2": (1, 2, 4),
             "dogs": (1, 2, 4),
             "waterbirds_concepts": (1, 2, 4),
             "celeba_concepts": (1, 2, 4),

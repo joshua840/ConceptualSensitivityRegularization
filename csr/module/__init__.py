@@ -5,3 +5,4 @@ from .jtt import JTT, JTTMetadataGenerator
 from .feature_extractor import FeatureExtractor
 
 from .dataset import DataModule
+from . import datamodule

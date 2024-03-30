@@ -1,4 +1,4 @@
-from ..dataset.convert_activation import convert_relu_to_softplus
+from ..utils.convert_activation import convert_relu_to_softplus
 import torchvision.models as models
 import torch
 
@@ -48,25 +48,25 @@ def load_model_ver2(
     # num_classes is used after initialize model.
     if model == "resnet18":
         net = models.resnet18(
-            weights=models.ResNet18_Weights.IMAGENET1K_V1
-            if imagenet_pretrained
-            else None
+            weights=(
+                models.ResNet18_Weights.IMAGENET1K_V1 if imagenet_pretrained else None
+            )
         )
         net = _init_last_layer(net, model_name=model)
         net = _post_processing(net)
     elif model == "resnet50":
         net = models.resnet50(
-            weights=models.ResNet50_Weights.IMAGENET1K_V2
-            if imagenet_pretrained
-            else None
+            weights=(
+                models.ResNet50_Weights.IMAGENET1K_V2 if imagenet_pretrained else None
+            )
         )
         net = _init_last_layer(net, model_name=model)
         net = _post_processing(net)
     elif model == "vgg1_bn":
         net = models.vgg16_bn(
-            weights=models.VGG16_BN_Weights.IMAGENET1K_V1
-            if imagenet_pretrained
-            else None
+            weights=(
+                models.VGG16_BN_Weights.IMAGENET1K_V1 if imagenet_pretrained else None
+            )
         )
         net = _init_last_layer(net, model_name=model)
         net = _post_processing(net)
@@ -78,9 +78,11 @@ def load_model_ver2(
         net = models.efficientnet_b0(pretrained=imagenet_pretrained)
     elif model == "convnext_t":
         net = models.convnext_tiny(
-            weights=models.ConvNeXt_Tiny_Weights.IMAGENET1K_V1
-            if imagenet_pretrained
-            else None,
+            weights=(
+                models.ConvNeXt_Tiny_Weights.IMAGENET1K_V1
+                if imagenet_pretrained
+                else None
+            ),
         )
         net = _init_last_layer(net, model_name=model)
         net = _post_processing(net)

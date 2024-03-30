@@ -1,7 +1,7 @@
 import torch
 
 from torchvision import transforms
-import pytorch_lightning as pl
+import lightning.pytorch as pl
 import numpy as np
 
 from torch.utils.data import DataLoader

@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 import torch
-import pytorch_lightning as pl
+import lightning.pytorch as pl
 from torch.utils.data import DataLoader
 
 from torch.utils.data import TensorDataset, DataLoader

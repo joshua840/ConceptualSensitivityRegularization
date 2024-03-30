@@ -7,7 +7,7 @@ check_val_every_n_epoch: 1
 inference_mode: false
 reload_dataloaders_every_n_epochs: 1
 logger:
-  class_path: pytorch_lightning.loggers.neptune.NeptuneLogger
+  class_path: lightning.pytorch.loggers.neptune.NeptuneLogger
   init_args:
     api_key: "eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiJhYTBjMGNjYS01MjI1LTQxZjgtYmRlZS1jMmYwYzgxNDE5ODEifQ=="
     project: "SmoothAttributionPrior/temp"
@@ -17,7 +17,7 @@ logger:
     capture_stdout: false
 callbacks: 
   # checkpoint_callback
-  - class_path : pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
+  - class_path : lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint
     init_args:
       dirpath: null
       monitor: "valid_valid_worst_acc"
@@ -25,6 +25,6 @@ callbacks:
       filename: "checkpt-{epoch:02d}-{valid_valid_worst_acc:.3f}"
       save_last: true
       save_weights_only: true
-  - class_path : pytorch_lightning.callbacks.LearningRateMonitor
+  - class_path : lightning.pytorch.callbacks.LearningRateMonitor
     init_args:
       logging_interval: "step"

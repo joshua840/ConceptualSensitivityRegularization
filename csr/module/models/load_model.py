@@ -3,7 +3,7 @@ import torchvision.models as models
 import torch
 
 
-def load_model_ver2(
+def load_model(
     model,
     num_classes,
     imagenet_pretrained,

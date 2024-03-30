@@ -1,4 +1,5 @@
-from pytorch_lightning.cli import LightningCLI
+from lightning.pytorch.cli import LightningCLI
+from csr.module.utils.save_config_callback import SaveConfigCallback
 
 
 class MyLightningCLI(LightningCLI):
@@ -9,7 +10,7 @@ class MyLightningCLI(LightningCLI):
 
 
 def cli_main():
-    cli = MyLightningCLI(run=False)
+    cli = MyLightningCLI(run=False, save_config_callback=SaveConfigCallback)
 
     cli.trainer.fit(cli.model)
     cli.trainer.test(cli.model, ckpt_path="best")

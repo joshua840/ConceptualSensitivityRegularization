@@ -51,7 +51,9 @@ class FeatureExtractor(ERM):
         results_dict = self.outputs[mode]
         features = torch.cat(results_dict["features"], dim=0).half()
 
-        dirs = os.path.join(self.hparams.save_root, self.hparams.dataset, mode)
+        dirs = os.path.join(
+            self.hparams.save_root, self.hparams.dataset, self.hparams.model, mode
+        )
 
         os.makedirs(dirs, exist_ok=True)
         torch.save(features, os.path.join(dirs, f"{self.current_epoch}.pt"))

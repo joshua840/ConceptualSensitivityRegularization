@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 
-from .models import load_model_ver2
+from .models import load_model
 from .utils.metrics import Metrics
 from .datamodule import DataModule
 
@@ -10,7 +10,7 @@ import typing
 
 class ERM(DataModule):
     """
-    pytorch_lightning `Trainer` will call the functions by the following order
+    `lightning.pytorch.Trainer` will call the functions by the following order
 
     for epoch in epochs:
         for batch in data:
@@ -71,7 +71,7 @@ class ERM(DataModule):
         kwargs["module_name"] = "ERM"
         self.save_hyperparameters()
 
-        self.model = load_model_ver2(
+        self.model = load_model(
             model=self.hparams.model,
             num_classes=(
                 1 if self.hparams.criterion == "bce" else self.hparams.num_classes

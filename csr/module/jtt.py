@@ -1,7 +1,7 @@
 import torch
 import os
 from .erm import ERM
-from pytorch_lightning.callbacks import ModelCheckpoint
+from lightning.pytorch.callbacks import ModelCheckpoint
 
 
 class JTTMetadataGenerator(ERM):
@@ -27,7 +27,9 @@ class JTTMetadataGenerator(ERM):
         incorrects = (y_hat > 0) != (y > 0)
         incorrect_indices = torch.where(incorrects)[0].detach()
 
-        callbacks = [elem for elem in self.trainer.callbacks if isinstance(elem, ModelCheckpoint)][0]
+        callbacks = [
+            elem for elem in self.trainer.callbacks if isinstance(elem, ModelCheckpoint)
+        ][0]
 
         save_path = os.path.join(callbacks.dirpath, f"jtt_meta_{self.current_epoch}.pt")
         # if directory does not exist, create it

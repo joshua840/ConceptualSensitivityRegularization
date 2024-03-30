@@ -1,9 +1,8 @@
 ############################################################### Dogs feature extractor #################################################################
-YAMLS="--model configsNew/FeatureExtractor/LitFeatureExtraction.yaml --trainer configsNew/FeatureExtractor/trainer.yaml "
+YAMLS="--model configs/FeatureExtractor/LitFeatureExtraction.yaml --trainer configs/FeatureExtractor/trainer.yaml "
 DATA_ARGS="--model.dataset catdog --model.data_dir /media/disk1/Data --model.save_root /media/disk2/Data/Features "
-
-CUDA_VISIBLE_DEVICES=3 python3 smoothAttributionPriorNew/main.py $YAMLS $DATA_ARGS \
---model.save_root /media/disk2/Data/Features --seed_everything 1234 # --trainer.max_epochs 1000 --trainer.check_val_every_n_epoch 99999 --trainer.num_sanity_val_steps -1
+CUDA_VISIBLE_DEVICES=0 python3 -m csr.jtt_weight_generator $YAMLS $DATA_ARGS \
+ --seed_everything 1234 --trainer.max_epochs 1000 --trainer.check_val_every_n_epoch 1000 --trainer.num_sanity_val_steps -1 \
 
 
 # ############################################################### Dogs_concepts feature extractor #################################################################

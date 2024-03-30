@@ -1,6 +1,6 @@
 import os
 import torch
-import pytorch_lightning as pl
+import lightning.pytorch as pl
 import pandas as pd
 import numpy as np
 import torchvision
@@ -34,11 +34,15 @@ class ColoredMNIST(CommonSpuriousDataset):
         if split == "tr" and minor_ratio is not None:
             indices_dict = self._get_indices_dict()
             indices_dict = self._set_minor_ratio(indices_dict, minor_ratio)
-            self.i = np.concatenate([indices for indices in indices_dict.values()], axis=0)
+            self.i = np.concatenate(
+                [indices for indices in indices_dict.values()], axis=0
+            )
 
         if subsample_what is not None:
             indices_dict = self._subsample_group(indices_dict)
-            self.i = np.concatenate([indices for indices in indices_dict.values()], axis=0)
+            self.i = np.concatenate(
+                [indices for indices in indices_dict.values()], axis=0
+            )
 
         if upsample_indices is not None:
             self.i = np.concatenate([self.i, np.array(upsample_indices)], axis=0)
@@ -56,7 +60,9 @@ class ColoredMNIST(CommonSpuriousDataset):
 
         for g in range(self.nb_groups):
             for y in range(self.nb_labels):
-                self.group_sizes[(g, y)] = ((self.y[self.i] == y) * (self.g[self.i] == g)).sum()
+                self.group_sizes[(g, y)] = (
+                    (self.y[self.i] == y) * (self.g[self.i] == g)
+                ).sum()
                 self.class_sizes.append((self.y[self.i] == y).sum())
 
     def transform(self, x):
@@ -87,7 +93,9 @@ class ColoredMNIST(CommonSpuriousDataset):
         indices_dict = {}
         for attr in range(2):
             for label in range(2):
-                indices_dict[(attr, label)] = ((self.g == attr) * (self.y == label)).nonzero().squeeze()
+                indices_dict[(attr, label)] = (
+                    ((self.g == attr) * (self.y == label)).nonzero().squeeze()
+                )
         return indices_dict
 
     def _remove_label_bias(self, indices_dict):
@@ -144,7 +152,12 @@ class ColoredMNIST(CommonSpuriousDataset):
             images = torch.stack([images, images, images], dim=1)
             images[torch.tensor(range(len(images))), (1 - colors).long(), :, :] *= 0
             images[torch.tensor(range(len(images))), 2, :, :] *= 0
-            return (list(range(len(labels))), (images.float() / 255.0), labels.long(), colors.long())
+            return (
+                list(range(len(labels))),
+                (images.float() / 255.0),
+                labels.long(),
+                colors.long(),
+            )
 
         tr = make_environment(mnist_train[0], mnist_train[1], 0.1)
         va = make_environment(mnist_val[0], mnist_val[1], 0.1)
@@ -205,7 +218,9 @@ class ColoredDummy(torch.utils.data.Dataset):
     def make_dataset(data_root, seed):
         pl.seed_everything(seed)
 
-        mnist = torchvision.datasets.MNIST("~/datasets/mnist", train=True, download=True)
+        mnist = torchvision.datasets.MNIST(
+            "~/datasets/mnist", train=True, download=True
+        )
         x = mnist.data
         np.random.shuffle(x.numpy())
         xs = [x[i : i + 6000] for i in range(0, len(x), 6000)]
@@ -222,7 +237,12 @@ class ColoredDummy(torch.utils.data.Dataset):
             # Apply the color to the image by zeroing out the other color channel
             images = torch.stack([images, images], dim=1)
             images[torch.tensor(range(len(images))), (1 - colors).long(), :, :] *= 0
-            return (list(range(len(colors))), (images.float() / 255.0), colors.long(), colors.long())
+            return (
+                list(range(len(colors))),
+                (images.float() / 255.0),
+                colors.long(),
+                colors.long(),
+            )
 
         tr = make_environment(x_tr)
         val = make_environment(x_val)
@@ -238,211 +258,3 @@ class ColoredDummy(torch.utils.data.Dataset):
         torch.save(val, data_path)
 
         return
-
-
-# import os
-# import torch
-# import pytorch_lightning as pl
-# import pandas as pd
-# import numpy as np
-# import torchvision
-# from PIL import Image
-# from torchvision import transforms
-# import pandas as pd
-# from src.dataset.common_spurious_dataset import CommonSpuriousDataset
-
-
-# class ColoredMNIST(CommonSpuriousDataset):
-#     def __init__(
-#         self,
-#         data_dir,
-#         split,
-#         data_seed=1234,
-#         minor_ratio=0.9,
-#     ):
-#         if split == "tr":
-#             minor_ratio = 0.1
-#         elif split == "va":
-#             minor_ratio = 0.2
-#         elif split == "te":
-#             minor_ratio = 0.5
-#         else:
-#             raise NameError
-
-#         fname = f"{split}_spu_{minor_ratio}_seed_{data_seed}.pt"
-#         data_path = os.path.join(data_dir, "ColoredMNIST", fname)
-
-#         # check if the data is already generated
-#         if os.path.exists(data_path):
-#             self.index, self.x, self.y, self.g = torch.load(data_path)
-#         else:
-#             raise NotImplementedError()
-
-#     def transform(self, x):
-#         return x
-
-#     def __getitem__(self, i):
-#         j = self.index[i]
-#         x = self.transform(self.x[j])
-#         y = self.y[j]
-#         g = self.g[j]
-#         return x, y, g, j
-
-#     def __len__(self):
-#         return len(self.index)
-
-#     @property
-#     def num_classes(self) -> int:
-#         return 2
-
-#     @property
-#     def num_groups(self) -> int:
-#         return 4
-
-#     def get_input_features(self):
-#         return (14, 14, 2)
-
-#     @staticmethod
-#     def make_dataset(data_dir, seed):
-#         pl.seed_everything(seed)
-
-#         mnist = torchvision.datasets.MNIST("~/Data/mnist", train=True, download=True)
-#         mnist_train = (mnist.data[:50000], mnist.targets[:50000])
-#         mnist_val = (mnist.data[50000:], mnist.targets[50000:])
-
-#         mnist = torchvision.datasets.MNIST("~/Data/mnist", train=False, download=True)
-#         mnist_test = (mnist.data, mnist.targets)
-
-#         rng_state = np.random.get_state()
-#         np.random.shuffle(mnist_train[0].numpy())
-#         np.random.set_state(rng_state)
-#         np.random.shuffle(mnist_train[1].numpy())
-
-#         # Build environments
-#         def make_environment(images, labels, e):
-#             def torch_bernoulli(p, size):
-#                 return (torch.rand(size) < p).long()
-
-#             def torch_xor(a, b):
-#                 return (a - b).abs()  # Assumes both inputs are either 0 or 1
-
-#             # 2x subsample for computational convenience
-#             images = images.reshape((-1, 28, 28))[:, ::2, ::2]
-#             # Assign a binary label based on the digit; flip label with probability 0.25
-#             labels = (labels < 5).long()
-#             labels = torch_xor(labels, torch_bernoulli(0.25, len(labels)))
-#             # Assign a color based on the label; flip the color with probability e
-#             colors = torch_xor(labels, torch_bernoulli(e, len(labels)))
-
-#             # Apply the color to the image by zeroing out the other color channel
-#             images = torch.stack([images, images], dim=1)
-#             images[torch.tensor(range(len(images))), (1 - colors).long(), :, :] *= 0
-#             return (list(range(len(labels))), (images.float() / 255.0), labels.long(), colors.long())
-
-#         tr1 = make_environment(mnist_train[0][::2], mnist_train[1][::2], 0.2)
-#         tr2 = make_environment(mnist_train[0][1::2], mnist_train[1][1::2], 0.1)
-#         tr3 = make_environment(mnist_train[0], mnist_train[1], 0.0)
-#         va1 = make_environment(mnist_val[0], mnist_val[1], 0.1)
-#         va2 = make_environment(mnist_val[0], mnist_val[1], 0.2)
-#         te = make_environment(mnist_test[0], mnist_test[1], 0.5)
-
-#         # create the directory if it does not exist
-
-#         fname = f"tr_spu_0.2_seed_{seed}.pt"
-#         data_path = os.path.join(data_dir, "ColoredMNIST", fname)
-#         os.makedirs(os.path.dirname(data_path), exist_ok=True)
-#         torch.save(tr1, data_path)
-
-#         fname = f"tr_spu_0.1_seed_{seed}.pt"
-#         data_path = os.path.join(data_dir, "ColoredMNIST", fname)
-#         torch.save(tr2, data_path)
-
-#         fname = f"tr_spu_0.0_seed_{seed}.pt"
-#         data_path = os.path.join(data_dir, "ColoredMNIST", fname)
-#         torch.save(tr3, data_path)
-
-#         fname = f"va_spu_0.1_seed_{seed}.pt"
-#         data_path = os.path.join(data_dir, "ColoredMNIST", fname)
-#         torch.save(va1, data_path)
-
-#         fname = f"va_spu_0.2_seed_{seed}.pt"
-#         data_path = os.path.join(data_dir, "ColoredMNIST", fname)
-#         torch.save(va2, data_path)
-
-#         fname = f"te_spu_0.5_seed_{seed}.pt"
-#         data_path = os.path.join(data_dir, "ColoredMNIST", fname)
-#         torch.save(te, data_path)
-
-#         return
-
-
-# class ColoredDummy(torch.utils.data.Dataset):
-#     def __init__(
-#         self,
-#         data_root,
-#         data_seed,
-#         minor_ratio,
-#         split,
-#         subsample_what=None,
-#         upsample_count=None,
-#         upsample_indices_path=None,
-#     ):
-#         fname = f"{split}_seed{data_seed}.pt"
-#         data_path = os.path.join(data_root, "ColoredDummy", fname)
-
-#         # check if the data is already generated
-#         if os.path.exists(data_path):
-#             self.index, self.x, self.y, self.g = torch.load(data_path)
-#         else:
-#             raise NotImplementedError()
-
-#     def transform(self, x):
-#         return x
-
-#     def __getitem__(self, i):
-#         j = self.index[i]
-#         x = self.transform(self.x[j])
-#         y = self.y[j]
-#         g = self.g[j]
-#         return x, y, g
-
-#     def __len__(self):
-#         return len(self.index)
-
-#     @staticmethod
-#     def make_dataset(data_root, seed):
-#         pl.seed_everything(seed)
-
-#         mnist = torchvision.datasets.MNIST("~/datasets/mnist", train=True, download=True)
-#         x = mnist.data
-#         np.random.shuffle(x.numpy())
-#         xs = [x[i : i + 6000] for i in range(0, len(x), 6000)]
-#         x = sum(xs)
-
-#         x_tr = x[:5000]
-#         x_val = x[5000:]
-
-#         def make_environment(images):
-#             # 2x subsample for computational convenience
-#             images = images.reshape((-1, 28, 28))[:, ::2, ::2]
-#             colors = torch.randint(low=0, high=2, size=(len(images),))
-
-#             # Apply the color to the image by zeroing out the other color channel
-#             images = torch.stack([images, images], dim=1)
-#             images[torch.tensor(range(len(images))), (1 - colors).long(), :, :] *= 0
-#             return (list(range(len(colors))), (images.float() / 255.0), colors.long(), colors.long())
-
-#         tr = make_environment(x_tr)
-#         val = make_environment(x_val)
-
-#         # create the directory if it does not exist
-#         fname = f"tr_seed{seed}.pt"
-#         data_path = os.path.join(data_root, "ColoredDummy", fname)
-#         os.makedirs(os.path.dirname(data_path), exist_ok=True)
-#         torch.save(tr, data_path)
-
-#         fname = f"val_seed{seed}.pt"
-#         data_path = os.path.join(data_root, "ColoredDummy", fname)
-#         torch.save(val, data_path)
-
-#         return

@@ -5,7 +5,7 @@ init_args:
   data_type: null #required
   data_dir: null #required
   data_seed: 1234
-  num_workers: 8
+  num_workers: 2
   batch_size_train: 128
   batch_size_test: 100
   minor_ratio: 0.05

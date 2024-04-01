@@ -9,6 +9,7 @@
 # CUDA_VISIBLE_DEVICES=1 python -m csr.main $YAMLS $TRAINER $MODEL \
 #  --seed_everything 1234 --model.minor_ratio 0.0 --model.batch_size_train 32 --model.learning_rate 1e-3 --model.set_last_layer three_layer
 
+
 ####################################### Debug run - ERM feature ####################################
 WORKSPACE_NAME="SmoothAttributionPrior"
 PROJECT_NAME="temp"
@@ -20,7 +21,6 @@ MODEL="--model.dataset catdog --model.data_dir ${DATA_PATH} --model.input_type f
 # Debug run
 CUDA_VISIBLE_DEVICES=0 python -m csr.main $YAMLS $TRAINER $MODEL \
  --seed_everything 1234 --model.minor_ratio 0.0 --model.batch_size_train 32 --model.learning_rate 1e-3 --model.set_last_layer three_layer \
-
 
 
 # ####################################### Debug run - ERM feature ####################################

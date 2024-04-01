@@ -1,6 +1,5 @@
 import os
 import yaml
-import numpy as np
 from PIL import Image
 from torch.utils.data import Dataset
 
@@ -10,6 +9,7 @@ class ConceptDataset(Dataset):
         self,
         root,
         dataset,
+        model_name,
         nimg_per_concept=50,
         transform=None,
         target_transform=None,
@@ -18,25 +18,26 @@ class ConceptDataset(Dataset):
         self.root = root
         self.transform = transform
         self.target_transform = target_transform
-        self.samples = self.__yaml_to_img_target__(dataset, nimg_per_concept)
+        self.nimg_per_concept = nimg_per_concept
+        self.samples = self._yaml_to_img_target(dataset, nimg_per_concept)
 
-    def __yaml_to_img_target__(self, dataset, nimg_per_concept=50):
+    def _yaml_to_img_target(self, dataset, nimg_per_concept=50):
         # yaml file contains a dictionary with keys as concepts and values as list of image paths
         # this function convert it to a list of tuples (image_path, target)
         if dataset in ["waterbirds_concepts", "catdog_concepts"]:
-            with open(f"configs/dataset/{dataset}.yaml", "r") as f:
+            with open(f"configs/dataset/waterbirds_concepts.yaml", "r") as f:
                 data = yaml.load(f, Loader=yaml.FullLoader)
         else:
             raise NotImplementedError("dataset is not implemented")
 
         samples = []
-        for concept, img_paths in data.items():
-            for img_path in img_paths[:nimg_per_concept]:
-                samples.append((img_path, concept))
+        for i, (img_paths) in enumerate(data.values()):
+            samples += [(img_path, i) for img_path in img_paths[:nimg_per_concept]]
+
         return samples
 
     def __len__(self):
-        return len(self.nimg_per_concept) * len(self.img_labels.keys())
+        return len(self.samples)
 
     def __getitem__(self, index: int):
         path, target = self.samples[index]

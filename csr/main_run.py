@@ -10,9 +10,7 @@ class MyLightningCLI(LightningCLI):
 
 
 def cli_main():
-    cli = MyLightningCLI(run=False, save_config_callback=SaveConfigCallback)
-
-    cli.trainer.fit(cli.model)
+    cli = MyLightningCLI(save_config_callback=SaveConfigCallback)
 
 
 if __name__ == "__main__":

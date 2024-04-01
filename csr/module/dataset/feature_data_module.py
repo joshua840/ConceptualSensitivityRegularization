@@ -17,6 +17,7 @@ class EpochChangeableFeatureDataset(CommonSpuriousDataset):
         split,
         root,
         dataset,
+        model_name,
         minor_ratio=None,
         subsample_what=None,
         upsample_indices=None,
@@ -25,17 +26,17 @@ class EpochChangeableFeatureDataset(CommonSpuriousDataset):
         split : train, val, test
         Dataset/tr/epoch0~599/data.npy
         or
-        Features/Dataset/tr/{0...599}.pt
-        Features/Dataset/tr/metadata.pt
-        Features/Dataset/va/0.pt
-        Features/Dataset/va/metadata.pt
-        Features/Dataset/te/0.pt
-        Features/Dataset/te/metadata.pt
+        Features/Dataset/MODEL_NAME/tr/{0...599}.pt
+        Features/Dataset/MODEL_NAME/tr/metadata.pt
+        Features/Dataset/MODEL_NAME/va/0.pt
+        Features/Dataset/MODEL_NAME/va/metadata.pt
+        Features/Dataset/MODEL_NAME/te/0.pt
+        Features/Dataset/MODEL_NAME/te/metadata.pt
         These features are saved without shuffling
         """
         self.split = split
         self.dataset_name = dataset
-        self.data_root = os.path.join(root, "Features", dataset, split)
+        self.data_root = os.path.join(root, "Features", dataset, model_name, split)
 
         # find the maximum epochs in the tr directory
         max_epochs = max(

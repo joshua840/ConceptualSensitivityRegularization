@@ -1,4 +1,4 @@
-class_path: module.CGR
+class_path: csr.module.CGR
 init_args:
   # DataModule
   dataset: null #required

@@ -66,6 +66,7 @@ class DataModule(pl.LightningModule):
         subsample_what: Optional[str] = None,
         upsample_count: Optional[int] = None,
         upsample_indices_path: Optional[str] = None,
+        model: Optional[str] = None,
         **kwargs,
     ):
         """
@@ -80,6 +81,7 @@ class DataModule(pl.LightningModule):
             subsample_what: subsample groups in training dataset
             upsample_count: upsampling count
             upsample_indices_path: path to upsampling indices
+            model: model name that is required for feature dataset
         """
         super().__init__()
         self.save_hyperparameters()
@@ -227,7 +229,11 @@ class DataModule(pl.LightningModule):
                 * self.hparams.upsample_count
             )
 
-        kwargs = {"root": self.hparams.data_dir, "dataset": self.hparams.dataset}
+        kwargs = {
+            "root": self.hparams.data_dir,
+            "dataset": self.hparams.dataset,
+            "model_name": self.hparams.model,
+        }
         self.train_dataset = EpochChangeableFeatureDataset(
             split="tr",
             minor_ratio=self.hparams.minor_ratio,
@@ -308,9 +314,9 @@ class DataModule(pl.LightningModule):
         pos_weight, num_classes, num_groups = {
             "celeba": (1, 2, 4),
             "celeba_gender": (1, 2, 4),
-            "waterbirds": (3.31, 2, 4),
+            "waterbirds": (3682 / 1113, 2, 4),
             "colored_mnist": (1.0, 10, 10),
-            "catdog": (1, 2, 4),
+            "catdog": (1536 / 3193, 2, 4),
             "dogs": (1, 2, 4),
             "waterbirds_concepts": (1, 2, 4),
             "celeba_concepts": (1, 2, 4),

@@ -1,4 +1,4 @@
-class_path: module.GDRO
+class_path: csr.module.GDRO
 init_args:
   # DataModule
   dataset: null #required

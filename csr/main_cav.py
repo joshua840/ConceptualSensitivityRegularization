@@ -18,8 +18,11 @@ dataset = EpochChangeableFeatureDataset(
     split="tr", root=args.root, dataset=args.dataset, model_name=args.model_name
 )
 
-w = compute_cav(vecs=dataset.x, targets=dataset.y, cav_type=args.cav_type)
+w = compute_cav(
+    vecs=dataset.x.numpy(), targets=dataset.y.numpy(), cav_type=args.cav_type
+)
 
+os.makedirs(args.save_path, exist_ok=True)
 # save
 torch.save(
     w,

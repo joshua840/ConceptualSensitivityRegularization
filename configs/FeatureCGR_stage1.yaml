@@ -3,7 +3,7 @@ init_args:
   # DataModule
   dataset: null #required
   data_type: feature
-  data_dir: /data
+  data_dir: null # required
   data_seed: 1234
   num_workers: 2
   batch_size_train: 32

@@ -142,8 +142,8 @@ def load_model_head(
     activation_fn,
     softplus_beta,
     num_classes,
+    in_features,
     ckpt_path=None,
-    in_features=None,
     freeze=False,
     name="model_g",
 ):

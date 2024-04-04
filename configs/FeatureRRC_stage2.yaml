@@ -2,8 +2,8 @@ class_path: csr.module.CGR
 init_args:
   # DataModule
   dataset: null #required
-  data_type: null #required
-  data_dir: /data
+  data_type: feature
+  data_dir: null # required
   data_seed: 1234
   num_workers: 2
   batch_size_train: 32
@@ -30,7 +30,7 @@ init_args:
   optimizer: adamw
   criterion: bce
   # CGR
-  cgr_stage: null # required
+  cgr_stage: stage2
   lamb_cs: 1
   lamb_cav: 1
   cs_method: dot_sq
@@ -41,5 +41,5 @@ init_args:
   g_criterion: bce
   g_activation: softplus
   g_softplus_beta: 10
-  g_freeze: False
+  g_freeze: True
   g_ckpt_path: null

@@ -1,12 +1,12 @@
-class_path: csr.module.FeatureExtractor
+class_path: csr.module.CGR
 init_args:
   # DataModule
   dataset: null #required
-  data_type: null #required
-  data_dir: null #required
+  data_type: feature
+  data_dir: null # required
   data_seed: 1234
   num_workers: 2
-  batch_size_train: 128
+  batch_size_train: 32
   batch_size_test: 100
   minor_ratio: 0.05
   subsample_what: null
@@ -14,12 +14,12 @@ init_args:
   upsample_indices_path: null
   # ERM
   model: convnext_t
-  input_type: raw
+  input_type: "feature"
   imagenet_pretrained: True
   model_path: null
   freeze_model: True
   freezing_target_layer: classifier.2
-  set_last_layer: linear
+  set_last_layer: null # required
   del_backbone: True
   h_activation_fn: softplus
   h_softplus_beta: 10
@@ -29,6 +29,17 @@ init_args:
   weight_decay: 1e-2
   optimizer: adamw
   criterion: bce
-  # FeatureExtractor
-  save_root: null # required
-  target_layer: classifier.1 # required
+  # CGR
+  cgr_stage: stage2
+  lamb_cs: 1
+  lamb_cav: 1
+  cs_method: dot_sq
+  grad_from: logit
+  target_layer: classifier.1
+  g_model: null # required
+  g_num_classes: 1
+  g_criterion: bce
+  g_activation: softplus
+  g_softplus_beta: 10
+  g_freeze: True
+  g_ckpt_path: null

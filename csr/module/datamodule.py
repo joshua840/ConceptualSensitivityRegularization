@@ -67,6 +67,7 @@ class DataModule(pl.LightningModule):
         upsample_count: Optional[int] = None,
         upsample_indices_path: Optional[str] = None,
         model: Optional[str] = None,
+        nimg_per_concept: Optional[int] = 50,
         **kwargs,
     ):
         """
@@ -95,18 +96,6 @@ class DataModule(pl.LightningModule):
             self._setup_feature_dataset()
 
     def _setup_raw_dataset(self):
-        Dataset = {
-            "celeba": CelebA,
-            "celeba_gender": CelebAGender,
-            "waterbirds": Waterbirds,
-            "catdog": CatDog,
-            "dogs": Dogs,
-            "waterbirds_concepts": ConceptDataset,
-            "celeba_concepts": ConceptDataset,
-            "dogs_concepts": ConceptDataset,
-            "catdog_concepts": ConceptDataset,
-            "celeba_concepts2": ConceptDataset,
-        }[self.hparams.dataset]
         if self.hparams.dataset in [
             "celeba",
             "waterbirds",
@@ -115,24 +104,20 @@ class DataModule(pl.LightningModule):
             "dogs",
             "catdog",
         ]:
+            Dataset = {
+                "celeba": CelebA,
+                "celeba_gender": CelebAGender,
+                "waterbirds": Waterbirds,
+                "catdog": CatDog,
+                "dogs": Dogs,
+            }[self.hparams.dataset]
             return self._init_balancing_group(
                 Dataset,
                 self.hparams.data_dir,
                 self.hparams.minor_ratio,
                 self.hparams.subsample_what,
             )
-        elif self.hparams.dataset in ["isic", "plant"]:
-            return self._init_datasubset_group(
-                Dataset, self.hparams.data_dir, self.hparams.minor_ratio
-            )
-        elif self.hparams.dataset in [
-            "waterbirds_concepts",
-            "celeba_concepts",
-            "celeba_gender_concepts",
-            "celeba_concepts2",
-            "dogs_concepts",
-            "catdog_concepts",
-        ]:
+        elif "concepts" in self.hparams.dataset:
             return self._spurious_dataset_group(
                 root=self.hparams.data_dir, dataset=self.hparams.dataset
             )
@@ -141,7 +126,6 @@ class DataModule(pl.LightningModule):
 
     def _spurious_dataset_group(self, root, dataset):
         # dataset
-
         target_resolution = (224, 224)
         resize_resolution = (256, 256)
         transform_tr = transforms.Compose(
@@ -163,15 +147,15 @@ class DataModule(pl.LightningModule):
             ]
         )
 
-        self.train_dataset = ConceptDataset(
-            root=root, dataset=dataset, transform=transform_tr
-        )
-        self.val_dataset = ConceptDataset(
-            root=root, dataset=dataset, transform=transform_te
-        )
-        self.test_dataset = ConceptDataset(
-            root=root, dataset=dataset, transform=transform_te
-        )
+        kwargs = {
+            "root": root,
+            "dataset": dataset,
+            "model_name": self.hparams.model,
+            "nimg_per_concept": self.hparams.nimg_per_concept,
+        }
+        self.train_dataset = ConceptDataset(transform=transform_tr, **kwargs)
+        self.val_dataset = ConceptDataset(transform=transform_te, **kwargs)
+        self.test_dataset = ConceptDataset(transform=transform_te, **kwargs)
         self.num_classes = 2
 
     def _init_balancing_group(self, Dataset, data_dir, minor_ratio, subsample_what):

@@ -297,6 +297,7 @@ class DataModule(pl.LightningModule):
     def _set_additional_configs(self):
         pos_weight, num_classes, num_groups = {
             "celeba": (1, 2, 4),
+            "celeba_collar": (1, 2, 3),
             "celeba_gender": (1, 2, 4),
             "waterbirds": (3682 / 1113, 2, 4),
             "colored_mnist": (1.0, 10, 10),

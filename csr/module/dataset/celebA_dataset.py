@@ -3,6 +3,8 @@ from PIL import Image
 from torchvision import transforms
 import pandas as pd
 from .balancing_group_dataset import GroupDataset
+from .common_spurious_dataset import CommonSpuriousDataset
+from .rrclarc_datasets import get_celeba_biased_dataset
 
 
 class CelebA(GroupDataset):

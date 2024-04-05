@@ -9,16 +9,16 @@ from torch.utils.data import Dataset
 import torch
 from typing import Optional, Union, List
 
-# from .parser import str2bool
-
 from . import (
     CelebA,
+    CelebACollar,
     CelebAGender,
     Waterbirds,
     ColoredMNIST,
     ConceptDataset,
     Dogs,
     CatDog,
+    get_celeba_biased_dataset,
 )
 
 
@@ -92,6 +92,7 @@ class DataModule(pl.LightningDataModule):
     def _init_dataset(self, dataset, data_dir, minor_ratio, subsample_what):
         Dataset = {
             "celeba": CelebA,
+            "celeba_collar": CelebACollar,
             "celeba_gender": CelebAGender,
             "waterbirds": Waterbirds,
             "catdog": CatDog,
@@ -114,6 +115,8 @@ class DataModule(pl.LightningDataModule):
             )
         elif dataset in ["isic", "plant"]:
             return self._init_datasubset_group(Dataset, data_dir, minor_ratio)
+        elif dataset in ["celeba_collar"]:
+            return self._init_rrclarc_group(Dataset, data_dir)
         elif dataset in [
             "waterbirds_concepts",
             "celeba_concepts",
@@ -203,6 +206,22 @@ class DataModule(pl.LightningDataModule):
         self.class_weights = get_binary_class_weight(
             self.train_dataset.targets(), self.num_classes
         )
+
+    def _init_rrclarc_group(self, data_dir):
+        # dataset
+        full_dataset = get_celeba_biased_dataset(data_dir)
+
+        dataset_train = full_dataset.get_subset_by_idxs(full_dataset.idxs_train)
+        dataset_val = full_dataset.get_subset_by_idxs(full_dataset.idxs_val)
+        dataset_test = full_dataset.get_subset_by_idxs(full_dataset.idxs_test)
+
+        dataset_train.do_augmentation = True
+        dataset_val.do_augmentation = False
+        dataset_test.do_augmentation = False
+
+        # num cl/gr
+        self.num_classes = 2
+        self.num_groups = 3
 
     def train_dataloader(self):
         return DataLoader(

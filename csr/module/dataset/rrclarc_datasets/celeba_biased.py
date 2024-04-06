@@ -188,7 +188,7 @@ class CelebACollar(BaseDataset):
         if self.do_augmentation:
             image = self.augmentation(image)
 
-        return image.float(), target
+        return image.float(), target, 0, 0
 
     def get_sample_name(self, i):
         return self.metadata.iloc[i]["image_id"]

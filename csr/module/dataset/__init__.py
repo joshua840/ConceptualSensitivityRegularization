@@ -7,4 +7,3 @@ from .colored_mnist_dataset import ColoredMNIST
 from .concept_dataset import ConceptDataset
 from .spuco_dataset import Dogs
 from .catdog_dataset import CatDog
-from .data_module import DataModule

@@ -3,7 +3,6 @@ import lightning.pytorch as pl
 from torch.utils.data import DataLoader
 from .dataset.feature_data_module import EpochChangeableFeatureDataset
 
-
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 import torch
@@ -20,36 +19,8 @@ from .dataset import (
     ConceptDataset,
     Dogs,
     CatDog,
+    get_celeba_biased_dataset,
 )
-
-
-class DataSubset(Dataset):
-    def __init__(
-        self, dataset: Dataset, idxs: Union[List, np.ndarray], minor_ratio=None
-    ):
-        self.dataset = dataset
-        self.idxs = idxs
-
-    def __getitem__(self, item_idx: int):
-        _idx = self.idxs[item_idx]
-        return self.dataset[_idx]
-
-    def __len__(self):
-        return len(self.idxs)
-
-    @property
-    def num_classes(self) -> int:
-        return self.dataset.num_classes
-
-    def targets(self):
-        return self.dataset.targets()[self.idxs]
-
-
-def get_binary_class_weight(ind_list, num_classes):
-    labels, counts = np.unique(ind_list, return_counts=True)
-    class_wts = ((counts.sum() - counts) / counts.sum()) * (1 / (num_classes - 1))
-    class_wts = class_wts[1] / class_wts[0]
-    return class_wts
 
 
 class DataModule(pl.LightningModule):
@@ -121,6 +92,8 @@ class DataModule(pl.LightningModule):
             return self._spurious_dataset_group(
                 root=self.hparams.data_dir, dataset=self.hparams.dataset
             )
+        elif self.hparams.dataset in ["celeba_collar"]:
+            return self._init_rrclarc_group(root=self.hparams.data_dir)
         else:
             raise NameError
 
@@ -188,19 +161,21 @@ class DataModule(pl.LightningModule):
         # class_weights
         self.class_weights = 1
 
-    def _init_datasubset_group(self, Dataset, data_dir, minor_ratio):
+    def _init_rrclarc_group(self, root):
         # dataset
-        full_dataset = Dataset(data_dir, minor_ratio=minor_ratio)
-        self.train_dataset = DataSubset(full_dataset, full_dataset.split_dict["train"])
-        self.val_dataset = DataSubset(full_dataset, full_dataset.split_dict["val"])
-        self.test_dataset = DataSubset(full_dataset, full_dataset.split_dict["test"])
+        full_dataset = get_celeba_biased_dataset([root])
+
+        self.train_dataset = full_dataset.get_subset_by_idxs(full_dataset.idxs_train)
+        self.val_dataset = full_dataset.get_subset_by_idxs(full_dataset.idxs_val)
+        self.test_dataset = full_dataset.get_subset_by_idxs(full_dataset.idxs_test)
+
+        self.train_dataset.do_augmentation = True
+        self.val_dataset.do_augmentation = False
+        self.test_dataset.do_augmentation = False
+
         # num cl/gr
-        self.num_classes = full_dataset.num_classes
-        self.num_groups = full_dataset.num_groups
-        # class_weights
-        self.class_weights = get_binary_class_weight(
-            self.train_dataset.targets(), self.num_classes
-        )
+        self.num_classes = 2
+        self.num_groups = 3
 
     def _setup_feature_dataset(self):
         if self.hparams.upsample_indices_path is None:

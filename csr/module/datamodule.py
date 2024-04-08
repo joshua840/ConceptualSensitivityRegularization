@@ -268,7 +268,7 @@ class DataModule(pl.LightningModule):
     def _set_additional_configs(self):
         pos_weight, num_classes, num_groups = {
             "celeba": (1, 2, 4),
-            "celeba_collar": (24235 / 2411, 2, 3),
+            "celeba_collar": (24235 / 2411, 2, 4),
             "celeba_gender": (1, 2, 4),
             "waterbirds": (3682 / 1113, 2, 4),
             "colored_mnist": (1.0, 10, 10),
@@ -279,6 +279,7 @@ class DataModule(pl.LightningModule):
             "dogs_concepts": (1, 2, 4),
             "celeba_concepts2": (1, 2, 4),
             "catdog_concepts": (1, 2, 4),
+            "celeba_collar_concepts": (1, 2, 4),  # TODO: check the numbers
         }[self.hparams.dataset]
 
         setattr(self.hparams, "pos_weight", pos_weight)

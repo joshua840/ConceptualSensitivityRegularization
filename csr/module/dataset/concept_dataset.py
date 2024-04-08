@@ -2,6 +2,7 @@ import os
 import yaml
 from PIL import Image
 from torch.utils.data import Dataset
+import json
 
 
 class ConceptDataset(Dataset):
@@ -28,9 +29,10 @@ class ConceptDataset(Dataset):
         if dataset in ["waterbirds_concepts", "catdog_concepts"]:
             with open(f"configs/dataset/waterbirds_concepts.yaml", "r") as f:
                 data = yaml.load(f, Loader=yaml.FullLoader)
-        elif dataset in ["celeba_cocnepts"]:
-            with open(f"configs/dataset/celeba_concepts.yaml", "r") as f:
-                data = yaml.load(f, Loader=yaml.FullLoader)
+        elif dataset in ["celeba_collar_concepts"]:
+            # read json file, not yaml
+            with open(f"configs/dataset/artifacts_celeba.json", "r") as f:
+                data = json.load(f)
         else:
             raise NotImplementedError("dataset is not implemented")
 
@@ -50,7 +52,7 @@ class ConceptDataset(Dataset):
             sample = Image.open(os.path.join(self.root, "data_large", path)).convert(
                 "RGB"
             )
-        elif self.dataset in ["celeba_concepts"]:
+        elif self.dataset in ["celeba_collar_concepts"]:
             sample = Image.open(
                 os.path.join(self.root, "img_align_celeba", path)
             ).convert("RGB")

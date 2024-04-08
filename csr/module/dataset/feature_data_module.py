@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 
 from torch.utils.data import TensorDataset, DataLoader
 from .common_spurious_dataset import CommonSpuriousDataset
-from . import CelebA, Waterbirds, ColoredMNIST, Dogs, CatDog
+from . import CelebA, Waterbirds, ColoredMNIST, Dogs, CatDog, CelebACollar
 
 
 class EpochChangeableFeatureDataset(CommonSpuriousDataset):
@@ -116,12 +116,11 @@ class EpochChangeableFeatureDataset(CommonSpuriousDataset):
         set_minor_ratio = {
             "colored_mnist": ColoredMNIST._set_minor_ratio,
             "celeba": CelebA._set_minor_ratio,
+            "celeba_collar": CelebACollar._set_minor_ratio,
             "celeba_gender": CelebA._set_minor_ratio,
             "waterbirds": Waterbirds._set_minor_ratio,
             "dogs": Dogs._set_minor_ratio,
             "catdog": CatDog._set_minor_ratio,
-            # "isic": ISICDatasetVer3._set_minor_ratio,
-            # "plant": PlantRGBDataset._set_minor_ratio,
         }[self.dataset_name]
         return set_minor_ratio(indices_selector_dict, minor_ratio)
 

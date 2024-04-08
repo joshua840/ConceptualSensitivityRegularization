@@ -181,6 +181,7 @@ class CelebACollar(BaseDataset):
         image = Image.open(img_name).convert("RGB")
 
         target = torch.tensor(self.metadata.iloc[idx]["targets"])
+        attr = torch.tensor(self.metadata.iloc[idx]["blonde_collar"])
 
         if self.transform:
             image = self.transform(image)
@@ -188,7 +189,7 @@ class CelebACollar(BaseDataset):
         if self.do_augmentation:
             image = self.augmentation(image)
 
-        return image.float(), target, 0, 0
+        return image.float(), target, attr, idx
 
     def get_sample_name(self, i):
         return self.metadata.iloc[i]["image_id"]
@@ -201,6 +202,35 @@ class CelebACollar(BaseDataset):
         subset = copy.deepcopy(self)
         subset.metadata = subset.metadata.iloc[idxs].reset_index(drop=True)
         return subset
+
+    def _get_indices_dict(self):
+        indices_dict = {}
+        for attr in range(2):
+            for label in range(2):
+                indices_dict[(attr, label)] = (
+                    ((self.attr == attr) * (self.y == label)).nonzero()[0].squeeze()
+                )
+        return indices_dict
+
+    @staticmethod
+    def _set_minor_ratio(indices_dict, minor_ratio):
+        new_length = int(len(indices_dict[(0, 1)]) * minor_ratio)
+        indices_dict[(1, 1)] = indices_dict[(1, 1)][:new_length]
+        return indices_dict
+
+    @staticmethod
+    def _remove_label_bias(indices_dict):
+        # indices_dict[(0, 0)] = indices_dict[(0, 0)][: len(indices_dict[(1, 1)])]
+        # indices_dict[(1, 0)] = indices_dict[(1, 0)][: len(indices_dict[(0, 1)])]
+        return indices_dict
+
+    @property
+    def num_classes(self) -> int:
+        return 2
+
+    @property
+    def num_groups(self) -> int:
+        return 3
 
 
 if __name__ == "__main__":

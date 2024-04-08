@@ -173,10 +173,6 @@ class DataModule(pl.LightningModule):
         self.val_dataset.do_augmentation = False
         self.test_dataset.do_augmentation = False
 
-        # num cl/gr
-        self.num_classes = 2
-        self.num_groups = 3
-
     def _setup_feature_dataset(self):
         if self.hparams.upsample_indices_path is None:
             upsample_indices = None
@@ -272,7 +268,7 @@ class DataModule(pl.LightningModule):
     def _set_additional_configs(self):
         pos_weight, num_classes, num_groups = {
             "celeba": (1, 2, 4),
-            "celeba_collar": (1, 2, 3),
+            "celeba_collar": (24235 / 2411, 2, 3),
             "celeba_gender": (1, 2, 4),
             "waterbirds": (3682 / 1113, 2, 4),
             "colored_mnist": (1.0, 10, 10),

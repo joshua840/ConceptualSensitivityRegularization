@@ -10,7 +10,7 @@ DEFAULTS="\
 --trainer configs/trainer.yaml \
 --trainer.logger.project ${WORKSPACE_NAME}/${PROJECT_NAME} \
 --trainer.logger.name ${PROJECT_NAME} \
---trainer.max_epochs 600 "
+--trainer.max_epochs 100 "
 
 
 # # Debug run

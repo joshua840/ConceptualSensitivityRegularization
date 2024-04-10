@@ -1,16 +1,12 @@
 WORKSPACE_NAME="SmoothAttributionPrior"
 PROJECT_NAME="temp"
 DATA_PATH='/media/disk2/Data'
-G_PATH="/home/jj/Research/ConceptualSensitivityRegularization/.neptune/temp/TEM-578/checkpoints/last.ckpt"
-MODEL_PATH='/home/jj/Research/ConceptualSensitivityRegularization/.neptune/temp/TEM-578/checkpoints/last.ckpt'
 DEFAULTS="\
---model configs/FeatureCSR_stage2.yaml \
+--model configs/FeatureCGR_stage2.yaml \
 --model.dataset catdog \
 --model.data_dir ${DATA_PATH} \
---model.g_ckpt_path ${G_PATH} \
 --model.g_model three_layer \
 --model.cs_method dot_sq \
---model.model_path ${MODEL_PATH} \
 --model.set_last_layer three_layer \
 --trainer configs/trainer.yaml \
 --trainer.logger.project ${WORKSPACE_NAME}/${PROJECT_NAME} \

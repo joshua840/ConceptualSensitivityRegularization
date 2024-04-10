@@ -2,6 +2,7 @@ import os
 import yaml
 from PIL import Image
 from torch.utils.data import Dataset
+import json
 
 
 class ConceptDataset(Dataset):
@@ -19,6 +20,7 @@ class ConceptDataset(Dataset):
         self.transform = transform
         self.target_transform = target_transform
         self.nimg_per_concept = nimg_per_concept
+        self.dataset = dataset
         self.samples = self._yaml_to_img_target(dataset, nimg_per_concept)
 
     def _yaml_to_img_target(self, dataset, nimg_per_concept=50):
@@ -26,6 +28,14 @@ class ConceptDataset(Dataset):
         # this function convert it to a list of tuples (image_path, target)
         if dataset in ["waterbirds_concepts", "catdog_concepts"]:
             with open(f"configs/dataset/waterbirds_concepts.yaml", "r") as f:
+                data = yaml.load(f, Loader=yaml.FullLoader)
+        elif dataset in ["celeba_collar_concepts"]:
+            # read json file, not yaml
+            with open(f"configs/dataset/artifacts_celeba.json", "r") as f:
+                data = json.load(f)
+        elif dataset in ["celeba_collar_concepts_v2"]:
+            # read json file, not yaml
+            with open(f"configs/dataset/celeba_collar_concepts_v2.yaml", "r") as f:
                 data = yaml.load(f, Loader=yaml.FullLoader)
         else:
             raise NotImplementedError("dataset is not implemented")
@@ -41,7 +51,16 @@ class ConceptDataset(Dataset):
 
     def __getitem__(self, index: int):
         path, target = self.samples[index]
-        sample = Image.open(os.path.join(self.root, "data_large", path)).convert("RGB")
+
+        if self.dataset in ["waterbirds_concepts", "catdog_concepts"]:
+            sample = Image.open(os.path.join(self.root, "data_large", path)).convert(
+                "RGB"
+            )
+        elif self.dataset in ["celeba_collar_concepts", "celeba_collar_concepts_v2"]:
+            sample = Image.open(
+                os.path.join(self.root, "img_align_celeba", path)
+            ).convert("RGB")
+
         if self.transform is not None:
             sample = self.transform(sample)
         if self.target_transform is not None:

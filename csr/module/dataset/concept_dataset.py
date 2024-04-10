@@ -33,6 +33,10 @@ class ConceptDataset(Dataset):
             # read json file, not yaml
             with open(f"configs/dataset/artifacts_celeba.json", "r") as f:
                 data = json.load(f)
+        elif dataset in ["celeba_collar_concepts_v2"]:
+            # read json file, not yaml
+            with open(f"configs/dataset/celeba_collar_concepts_v2.yaml", "r") as f:
+                data = yaml.load(f, Loader=yaml.FullLoader)
         else:
             raise NotImplementedError("dataset is not implemented")
 
@@ -52,7 +56,7 @@ class ConceptDataset(Dataset):
             sample = Image.open(os.path.join(self.root, "data_large", path)).convert(
                 "RGB"
             )
-        elif self.dataset in ["celeba_collar_concepts"]:
+        elif self.dataset in ["celeba_collar_concepts", "celeba_collar_concepts_v2"]:
             sample = Image.open(
                 os.path.join(self.root, "img_align_celeba", path)
             ).convert("RGB")

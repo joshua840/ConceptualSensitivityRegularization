@@ -5,7 +5,7 @@ debugging*
 # Config
 .neptune
 .neptune/
-
+scripts_local/
 
 # Data
 data

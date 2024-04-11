@@ -1,0 +1,114 @@
+# lightning.pytorch==2.0.9.post0
+seed_everything: 1234
+trainer:
+  accelerator: gpu
+  strategy: auto
+  devices: 1
+  num_nodes: 1
+  precision: 32-true
+  logger:
+    class_path: lightning.pytorch.loggers.NeptuneLogger
+    init_args:
+      api_key: eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiJhYTBjMGNjYS01MjI1LTQxZjgtYmRlZS1jMmYwYzgxNDE5ODEifQ==
+      project: SmoothAttributionPrior/temp
+      name: temp
+      run: null
+      log_model_checkpoints: false
+      prefix: training
+    dict_kwargs:
+      capture_stdout: false
+  callbacks:
+  - class_path: lightning.pytorch.callbacks.ModelCheckpoint
+    init_args:
+      dirpath: null
+      filename: checkpt-{epoch:02d}-{valid_valid_worst_acc:.3f}
+      monitor: valid_valid_worst_acc
+      verbose: false
+      save_last: true
+      save_top_k: 1
+      save_weights_only: true
+      mode: max
+      auto_insert_metric_name: true
+      every_n_train_steps: null
+      train_time_interval: null
+      every_n_epochs: null
+      save_on_train_epoch_end: null
+  - class_path: lightning.pytorch.callbacks.LearningRateMonitor
+    init_args:
+      logging_interval: step
+      log_momentum: false
+  fast_dev_run: false
+  max_epochs: 100
+  min_epochs: null
+  max_steps: -1
+  min_steps: null
+  max_time: null
+  limit_train_batches: null
+  limit_val_batches: null
+  limit_test_batches: null
+  limit_predict_batches: null
+  overfit_batches: 0.0
+  val_check_interval: null
+  check_val_every_n_epoch: 1
+  num_sanity_val_steps: null
+  log_every_n_steps: 30
+  enable_checkpointing: null
+  enable_progress_bar: null
+  enable_model_summary: null
+  accumulate_grad_batches: 1
+  gradient_clip_val: null
+  gradient_clip_algorithm: null
+  deterministic: null
+  benchmark: null
+  inference_mode: false
+  use_distributed_sampler: true
+  profiler: null
+  detect_anomaly: false
+  barebones: false
+  plugins: null
+  sync_batchnorm: false
+  reload_dataloaders_every_n_epochs: 1
+  default_root_dir: null
+model:
+  class_path: csr.module.CGR
+  init_args:
+    cgr_stage: stage1
+    lamb_cs: 1.0
+    lamb_cav: 1.0
+    cs_method: dot_sq
+    grad_from: logit
+    target_layer: classifier.1
+    g_model: three_layer
+    g_num_classes: 1
+    g_criterion: bce
+    g_activation: softplus
+    g_softplus_beta: 10.0
+    g_freeze: false
+    g_ckpt_path: null
+    model: convnext_t
+    input_type: feature
+    imagenet_pretrained: true
+    model_path: null
+    freeze_model: true
+    freezing_target_layer: classifier.2
+    set_last_layer: three_layer
+    del_backbone: true
+    h_activation_fn: softplus
+    h_softplus_beta: 10.0
+    learning_rate: 0.001
+    scheduler: cosineannealing
+    milestones:
+    - 9999
+    weight_decay: 0.01
+    optimizer: adamw
+    criterion: bce
+    dataset: celeba_collar_concepts
+    data_dir: /media/disk2/Data
+    num_workers: 2
+    batch_size_train: 16
+    batch_size_test: 100
+    minor_ratio: 0.05
+    subsample_what: null
+    upsample_count: null
+    upsample_indices_path: null
+    nimg_per_concept: 50

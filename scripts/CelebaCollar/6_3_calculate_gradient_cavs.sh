@@ -5,7 +5,7 @@ PROJECT_NAME="temp"
 DATA_PATH='/media/disk2/Data'
 DEFAULTS="\
 --model configs/FeatureCGR_stage1.yaml \
---model.dataset celeba_collar_concepts \
+--model.dataset celeba_collar_concepts_v2 \
 --model.cgr_stage stage1 \
 --model.data_dir ${DATA_PATH} \
 --model.g_model three_layer \

@@ -5,7 +5,7 @@ PROJECT_NAME="temp"
 DATA_PATH='/home/data'
 YAMLS="--model configs/FeatureERM.yaml --trainer configs/trainer.yaml "
 TRAINER="--trainer.logger.project ${WORKSPACE_NAME}/${PROJECT_NAME} --trainer.logger.name ${PROJECT_NAME} --trainer.max_epochs 100 "
-MODEL="--model.dataset celeba_collar --model.data_dir ${DATA_PATH} --model.input_type feature "
+MODEL="--model.dataset waterbirds --model.data_dir ${DATA_PATH} --model.input_type feature "
 
 
 # for LL in three_layer

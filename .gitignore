@@ -5,15 +5,11 @@ debugging*
 # Config
 .neptune
 .neptune/
-
-
-# Data
-data
+scripts_local/
 
 # Results
 results
 output
-
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -48,7 +44,6 @@ test_tube_exp/
 tests/tests_tt_dir/
 tests/save_dir
 default/   
-data/
 test_tube_logs/
 test_tube_data/
 datasets/

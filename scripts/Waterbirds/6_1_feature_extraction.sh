@@ -10,3 +10,4 @@ CUDA_VISIBLE_DEVICES=0 python3 -m csr.main_run fit \
  --trainer.check_val_every_n_epoch 1000 \
  --trainer.num_sanity_val_steps -1 
 
+# catdog_concepts == waterbirds_concepts

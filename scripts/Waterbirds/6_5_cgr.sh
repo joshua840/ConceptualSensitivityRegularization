@@ -1,9 +1,10 @@
 WORKSPACE_NAME="SmoothAttributionPrior"
+PROJECT_NAME="240411WaterBirds"
 PROJECT_NAME="temp"
 DATA_PATH='/media/disk2/Data'
 DEFAULTS="\
 --model configs/FeatureCGR_stage2.yaml \
---model.dataset catdog \
+--model.dataset waterbirds \
 --model.data_dir ${DATA_PATH} \
 --model.g_model three_layer \
 --model.cs_method dot_sq \
@@ -12,25 +13,6 @@ DEFAULTS="\
 --trainer.logger.project ${WORKSPACE_NAME}/${PROJECT_NAME} \
 --trainer.logger.name ${PROJECT_NAME} \
 --trainer.max_epochs 600 "
-
-# # Debug run
-for LL in three_layer
-do
-for MR in 0 # 0.05
-do
-for BS in 16 
-do
-for SEED in 1234 
-do
-for LR in 1e-3
-do
-CUDA_VISIBLE_DEVICES=0 python -m csr.main $DEFAULTS \
- --seed_everything $SEED --model.minor_ratio $MR --model.batch_size_train $BS --model.learning_rate $LR --model.set_last_layer $LL --model.lamb_cs 1 --model.lamb_cav 1
-done
-done
-done
-done
-done
 
 
 # for LL in three_layer

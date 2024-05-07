@@ -16,6 +16,7 @@ class ConceptDataset(Dataset):
         target_transform=None,
     ):
         super().__init__()
+        dataset = "waterbirds_concepts" if dataset == "catdog_concepts" else dataset
         self.root = root
         self.transform = transform
         self.target_transform = target_transform
@@ -26,16 +27,17 @@ class ConceptDataset(Dataset):
     def _yaml_to_img_target(self, dataset, nimg_per_concept=50):
         # yaml file contains a dictionary with keys as concepts and values as list of image paths
         # this function convert it to a list of tuples (image_path, target)
-        if dataset in ["waterbirds_concepts", "catdog_concepts"]:
-            with open(f"configs/dataset/waterbirds_concepts.yaml", "r") as f:
-                data = yaml.load(f, Loader=yaml.FullLoader)
-        elif dataset in ["celeba_collar_concepts"]:
-            # read json file, not yaml
+        if dataset in ["celeba_collar_concepts"]:
             with open(f"configs/dataset/artifacts_celeba.json", "r") as f:
                 data = json.load(f)
-        elif dataset in ["celeba_collar_concepts_v2"]:
-            # read json file, not yaml
-            with open(f"configs/dataset/celeba_collar_concepts_v2.yaml", "r") as f:
+        elif dataset in [
+            "celeba_collar_concepts_v2",
+            "waterbirds_concepts_v2",
+            "catdog_concepts_v2",
+            "waterbirds_concepts",
+            "catdog_concepts",
+        ]:
+            with open(f"configs/dataset/{dataset}.yaml", "r") as f:
                 data = yaml.load(f, Loader=yaml.FullLoader)
         else:
             raise NotImplementedError("dataset is not implemented")
@@ -52,14 +54,16 @@ class ConceptDataset(Dataset):
     def __getitem__(self, index: int):
         path, target = self.samples[index]
 
-        if self.dataset in ["waterbirds_concepts", "catdog_concepts"]:
-            sample = Image.open(os.path.join(self.root, "data_large", path)).convert(
-                "RGB"
-            )
-        elif self.dataset in ["celeba_collar_concepts", "celeba_collar_concepts_v2"]:
-            sample = Image.open(
-                os.path.join(self.root, "img_align_celeba", path)
-            ).convert("RGB")
+        middle_dir = {
+            "waterbirds_concepts": "data_large",
+            "catdog_concepts": "data_large",
+            "celeba_collar_concepts": "img_align_celeba",
+            "celeba_collar_concepts_v2": "img_align_celeba",
+            "waterbirds_concepts_v2": "waterbird_complete95_forest2water2",
+            "catdog_concepts_v2": "",
+        }[self.dataset]
+
+        sample = Image.open(os.path.join(self.root, middle_dir, path)).convert("RGB")
 
         if self.transform is not None:
             sample = self.transform(sample)

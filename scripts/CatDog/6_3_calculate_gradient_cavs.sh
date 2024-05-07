@@ -5,7 +5,7 @@ PROJECT_NAME="temp"
 DATA_PATH='/media/disk2/Data'
 DEFAULTS="\
 --model configs/FeatureCGR_stage1.yaml \
---model.dataset catdog_concepts \
+--model.dataset catdog_concepts_v2 \
 --model.cgr_stage stage1 \
 --model.data_dir ${DATA_PATH} \
 --model.g_model three_layer \
@@ -13,11 +13,11 @@ DEFAULTS="\
 --trainer configs/trainer.yaml \
 --trainer.logger.project ${WORKSPACE_NAME}/${PROJECT_NAME} \
 --trainer.logger.name ${PROJECT_NAME} \
---trainer.max_epochs 20 "
+--trainer.max_epochs 200 "
 
 for LL in three_layer
 do
-for BS in 16
+for BS in 4
 do
 for SEED in 1234
 do

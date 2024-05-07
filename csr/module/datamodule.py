@@ -281,6 +281,8 @@ class DataModule(pl.LightningModule):
             "catdog_concepts": (1, 2, 4),
             "celeba_collar_concepts": (1, 2, 4),  # TODO: check the numbers
             "celeba_collar_concepts_v2": (1, 2, 2),  # TODO: check the numbers
+            "catdog_concepts_v2": (1, 2, 2),  # TODO: check the numbers
+            "waterbirds_concepts_v2": (1, 2, 2),  # TODO: check the numbers
         }[self.hparams.dataset]
 
         setattr(self.hparams, "pos_weight", pos_weight)

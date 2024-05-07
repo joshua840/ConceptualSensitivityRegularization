@@ -1,5 +1,6 @@
 WORKSPACE_NAME="SmoothAttributionPrior"
 PROJECT_NAME="temp"
+PROJECT_NAME="240401CatDog"
 DATA_PATH='/media/disk2/Data'
 DEFAULTS="\
 --model configs/FeatureCGR_stage2.yaml \
@@ -16,6 +17,7 @@ DEFAULTS="\
 
 
 G_PATH='/mnt/ssd/jj/Research/Maxent/ConceptualSensitivityRegularization/.neptune/temp/TEM-585/checkpoints/last.ckpt'
+# G_PATH='/mnt/ssd/jj/Research/Maxent/ConceptualSensitivityRegularization/.neptune/temp/TEM-585/checkpoints/last.ckpt'
 LL=three_layer
 MR=0.0
 BS=16

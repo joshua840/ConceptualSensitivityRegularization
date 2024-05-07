@@ -6,8 +6,8 @@ from . import CGR
 class MultiCGR(CGR):
     def __init__(
         self,
-        g_ckpt_path: list = [],
-        g_num_heads: int = 1,
+        g_ckpt_path: list,
+        g_num_heads: int,
         **kwargs,
     ):
         """
@@ -16,6 +16,7 @@ class MultiCGR(CGR):
             g_num_heads: int, number of heads of model_g
         """
         assert len(g_ckpt_path) == g_num_heads, "len(g_ckpt_path) != g_num_heads"
+        assert g_num_heads != 0, "g_num_heads should be greater than 0"
         assert self.hparams.cgr_stage == "stage2", "CGR stage1 is not supported"
 
         super().__init__(**kwargs)

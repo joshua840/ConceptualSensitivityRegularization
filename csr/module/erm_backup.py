@@ -105,8 +105,6 @@ class ERM(DataModule):
         self.best_worst_val_loss = 1e6
         self.best_epoch = 0.0
         self.best_worst_acc = 0.0
-        self.best_wc_epoch = 0.0
-        self.best_wc_acc = 0.0
 
         # For saving outputs
         self.validation0_step_outputs = []
@@ -192,8 +190,8 @@ class ERM(DataModule):
         outputs[0]['y_hat']: y_hat tensor for each batch is saved as list
         outputs[0]['group']: group tensor for each batch is saved as list
         """
-        acc_dict = {}
-        len_dict = {}  # to calculate weighted average
+        acc_list = []
+        len_list = []  # to calculate weighted average
 
         y_hat = torch.cat([elem["y_hat"] for elem in outputs])
         y = torch.cat([elem["y"] for elem in outputs])
@@ -212,8 +210,8 @@ class ERM(DataModule):
                 else:
                     acc = (y_hat[mask] > 0).sum() / mask.sum()
 
-                acc_dict[(y_idx, a_idx)] = acc
-                len_dict[(y_idx, a_idx)] = mask.sum()
+                acc_list.append(acc)
+                len_list.append(mask.sum())
 
                 self.log(
                     f"{mode}_acc_y_{y_idx}_a_{a_idx}",
@@ -222,36 +220,16 @@ class ERM(DataModule):
                     sync_dist=False,
                     add_dataloader_idx=False,
                 )
-        worst_acc = min(acc_dict.values())
+        worst_acc = min(acc_list)
         self.log_dict({f"{mode}_worst_acc": worst_acc})
 
-        class_acc_list = []
-        for y_idx in range(self.hparams.num_classes):
-            acc = 0
-            for a_idx in range(self.hparams.num_groups):
-                acc += acc_dict[(y_idx, a_idx)] * len_dict[(y_idx, a_idx)]
-            acc /= sum(
-                [len_dict[(y_idx, a_idx)] for a_idx in range(self.hparams.num_groups)]
-            )
-            class_acc_list.append(acc)
-            self.log(
-                f"{mode}_class_acc_y_{y_idx}",
-                acc,
-                prog_bar=True,
-                sync_dist=False,
-                add_dataloader_idx=False,
-            )
-        wc_acc = min(class_acc_list)
-        self.log_dict({f"{mode}_worst_class_acc": wc_acc})
-
         # Weighted average of the accuracies
-        avg_acc = sum(
-            [acc * len for acc, len in zip(acc_dict.values(), len_dict.values())]
-        ) / sum(len_dict.values())
+        avg_acc = sum([acc * len for acc, len in zip(acc_list, len_list)]) / sum(
+            len_list
+        )
         self.log_dict({f"{mode}_avg_acc": avg_acc})
 
         if mode == "valid_valid":
-            # Worst group accuracy
             if worst_acc >= self.best_worst_acc and self.current_epoch > 0:
                 self.best_epoch = self.current_epoch
                 self.best_worst_acc = worst_acc
@@ -259,32 +237,11 @@ class ERM(DataModule):
                 f"{mode}_best_epoch", torch.tensor(self.best_epoch).to(torch.float32)
             )
             self.log(f"{mode}_best_worst_acc", self.best_worst_acc)
-
-            # Worst class acc
-            if wc_acc >= self.best_wc_acc and self.current_epoch > 0:
-                self.best_wc_epoch = self.current_epoch
-                self.best_wc_acc = wc_acc
-            self.log(
-                f"{mode}_best_wc_epoch",
-                torch.tensor(self.best_wc_epoch).to(torch.float32),
-            )
-            self.log(f"{mode}_best_wc_acc", self.best_wc_acc)
-
         if mode == "valid_test" and self.best_epoch == self.current_epoch:
             self.log(f"{mode}_worst_acc_by_best_val_worst", worst_acc)
             self.log(f"{mode}_avg_acc_by_best_val_worst", avg_acc)
-            for i in range(len(acc_dict.values())):
-                self.log(
-                    f"{mode}_group_{i}_acc_by_best_val_worst", acc_dict.values()[i]
-                )
-
-        if mode == "valid_test" and self.best_wc_epoch == self.current_epoch:
-            self.log(f"{mode}_worst_acc_by_best_val_cls_worst", wc_acc)
-            self.log(f"{mode}_avg_acc_by_best_val_cls_worst", avg_acc)
-            for i in range(len(acc_dict.values())):
-                self.log(
-                    f"{mode}_group_{i}_acc_by_best_val_cls_worst", acc_dict.values()[i]
-                )
+            for i in range(len(acc_list)):
+                self.log(f"{mode}_group_{i}_acc_by_best_val_worst", acc_list[i])
 
     def on_validation_epoch_end(self):
         self.eval_epoch_end(self.validation0_step_outputs, "valid_valid")

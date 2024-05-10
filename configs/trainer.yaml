@@ -25,6 +25,15 @@ callbacks:
       filename: "checkpt-{epoch:02d}-{valid_valid_worst_acc:.3f}"
       save_last: true
       save_weights_only: true
+  # checkpoint_callback 2
+  - class_path : lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint
+    init_args:
+      dirpath: null
+      monitor: "valid_valid_worst_class_acc"
+      mode: "max"
+      filename: "checkpt-{epoch:02d}-{valid_valid_worst_class_acc:.3f}"
+      save_last: false
+      save_weights_only: true
   - class_path : lightning.pytorch.callbacks.LearningRateMonitor
     init_args:
       logging_interval: "step"

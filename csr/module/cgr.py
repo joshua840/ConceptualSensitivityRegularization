@@ -56,6 +56,11 @@ class CGR(ERM):
             },
         }[self.hparams.model][self.hparams.target_layer]
 
+        self.load_model_head()
+
+        self.g_criterion_fn = self.get_criterion_fn(self.hparams.g_criterion)
+
+    def load_model_head(self):
         self.model_g = load_model_head(
             model=self.hparams.g_model,
             activation_fn=self.hparams.g_activation,
@@ -65,8 +70,6 @@ class CGR(ERM):
             in_features=self.in_features,
             freeze=self.hparams.g_freeze,
         )
-
-        self.g_criterion_fn = self.get_criterion_fn(self.hparams.g_criterion)
 
     def save_outputs_hook(self):
         def fn(_, __, output):

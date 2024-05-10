@@ -3,10 +3,14 @@ from .models.load_model import load_model_head
 from . import CGR
 
 
+def str2list(s: str):
+    return [x for x in s.split(",")]
+
+
 class MultiCGR(CGR):
     def __init__(
         self,
-        g_ckpt_path: list,
+        g_ckpt_path: str,
         g_num_heads: int,
         **kwargs,
     ):
@@ -15,13 +19,18 @@ class MultiCGR(CGR):
             g_ckpt_path: str, ckpt path for model_g if needed
             g_num_heads: int, number of heads of model_g
         """
-        assert len(g_ckpt_path) == g_num_heads, "len(g_ckpt_path) != g_num_heads"
-        assert g_num_heads != 0, "g_num_heads should be greater than 0"
         assert self.hparams.cgr_stage == "stage2", "CGR stage1 is not supported"
 
         super().__init__(**kwargs)
         kwargs["module_name"] = "MultiCGR"
         self.save_hyperparameters()
+
+    def load_model_head(self):
+        g_ckpt_path = self.hparams.g_ckpt_path.split(",")
+        assert (
+            len(g_ckpt_path) == self.hparams.g_num_heads
+        ), "len(g_ckpt_path) != g_num_heads"
+        assert self.hparams.g_num_heads != 0, "g_num_heads should be greater than 0"
 
         self.model_g = torch.nn.ModuleList(
             [

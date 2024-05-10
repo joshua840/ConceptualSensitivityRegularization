@@ -266,25 +266,26 @@ class DataModule(pl.LightningModule):
         return super().on_train_epoch_start()
 
     def _set_additional_configs(self):
-        pos_weight, num_classes, num_groups = {
-            "celeba": (1, 2, 4),
-            "celeba_collar": (24235 / 2411, 2, 4),
-            "celeba_gender": (1, 2, 4),
-            "waterbirds": (3682 / 1113, 2, 4),
-            "colored_mnist": (1.0, 10, 10),
-            "catdog": (1536 / 3193, 2, 4),
-            "dogs": (1, 2, 4),
-            "waterbirds_concepts": (1, 2, 4),
-            "celeba_concepts": (1, 2, 4),
-            "dogs_concepts": (1, 2, 4),
-            "celeba_concepts2": (1, 2, 4),
-            "catdog_concepts": (1, 2, 4),
-            "celeba_collar_concepts": (1, 2, 4),  # TODO: check the numbers
-            "celeba_collar_concepts_v2": (1, 2, 2),  # TODO: check the numbers
-            "catdog_concepts_v2": (1, 2, 2),  # TODO: check the numbers
-            "waterbirds_concepts_v2": (1, 2, 2),  # TODO: check the numbers
+        pos_weight, num_classes, num_attributes, num_groups = {
+            "celeba": (1, 2, 2, 4),
+            "celeba_collar": (24235 / 2411, 2, 2, 4),
+            "celeba_gender": (1, 2, 2, 4),
+            "waterbirds": (3682 / 1113, 2, 2, 4),
+            "colored_mnist": (1.0, 10, 1, 10),
+            "catdog": (1536 / 3193, 2, 2, 4),
+            "dogs": (1, 2, 2, 4),
+            "waterbirds_concepts": (1, 2, 2, 4),
+            "celeba_concepts": (1, 2, 2, 4),
+            "dogs_concepts": (1, 2, 2, 4),
+            "celeba_concepts2": (1, 2, 2, 4),
+            "catdog_concepts": (1, 2, 2, 4),
+            "celeba_collar_concepts": (1, 2, 2, 4),  # TODO: check the numbers
+            "celeba_collar_concepts_v2": (1, 2, 2, 2),  # TODO: check the numbers
+            "catdog_concepts_v2": (1, 2, 2, 2),  # TODO: check the numbers
+            "waterbirds_concepts_v2": (1, 2, 2, 2),  # TODO: check the numbers
         }[self.hparams.dataset]
 
         setattr(self.hparams, "pos_weight", pos_weight)
         setattr(self.hparams, "num_classes", num_classes)
+        setattr(self.hparams, "num_attributes", num_attributes)
         setattr(self.hparams, "num_groups", num_groups)

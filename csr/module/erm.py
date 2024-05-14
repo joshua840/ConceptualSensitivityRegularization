@@ -282,7 +282,7 @@ class ERM(DataModule):
                 )
 
         if mode == "valid_test" and self.best_wc_epoch == self.current_epoch:
-            self.log(f"{mode}_worst_acc_by_best_val_cls_worst", wc_acc)
+            self.log(f"{mode}_worst_acc_by_best_val_cls_worst", worst_acc)
             self.log(f"{mode}_avg_acc_by_best_val_cls_worst", avg_acc)
             for i in range(len(acc_dict.values())):
                 self.log(

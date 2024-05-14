@@ -12,8 +12,8 @@ class CGR(ERM):
         cs_method: str = "dot_sq",
         grad_from: str = "logit",
         target_layer: str = "classifier.1",
-        g_model: str = "linear",
         g_num_classes: int = 1,
+        g_model: str = "linear",
         g_criterion: str = "bce",
         g_activation: str = "softplus",
         g_softplus_beta: float = 10,
@@ -29,8 +29,8 @@ class CGR(ERM):
             cs_method: str, Conceptual Sencitivity calculation method
             grad_from: str, gradient of logit vs loss
             target_layer: str, embedding layer
-            g_model: str, additional model
             g_num_classes: int, num_classes of model_g
+            g_model: str, additional model
             g_criterion: str, criterion of model_g
             g_activation: str, activation of model_g
             g_softplus_beta: float, beta of model_g

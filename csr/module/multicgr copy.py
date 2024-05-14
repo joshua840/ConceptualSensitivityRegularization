@@ -10,35 +10,32 @@ def str2list(s: str):
 class MultiCGR(CGR):
     def __init__(
         self,
-        g_num_heads: int,
         g_ckpt_path: str,
-        g_model: str = "linear",
-        lamb_cs: float = 1,
+        g_num_heads: int,
         **kwargs,
     ):
         """
         Args:
-            g_num_heads: int, number of heads of model_g
             g_ckpt_path: str, ckpt path for model_g if needed
-            g_model: str, additional model
+            g_num_heads: int, number of heads of model_g
         """
-        super().__init__(**kwargs)
         assert self.hparams.cgr_stage == "stage2", "CGR stage1 is not supported"
+
+        super().__init__(**kwargs)
         kwargs["module_name"] = "MultiCGR"
         self.save_hyperparameters()
 
     def load_model_head(self):
         g_ckpt_path = self.hparams.g_ckpt_path.split(",")
-        g_model = self.hparams.g_model.split(",")
         assert (
-            len(g_ckpt_path) == self.hparams.g_num_heads == len(g_model)
+            len(g_ckpt_path) == self.hparams.g_num_heads
         ), "len(g_ckpt_path) != g_num_heads"
         assert self.hparams.g_num_heads != 0, "g_num_heads should be greater than 0"
 
         self.model_g = torch.nn.ModuleList(
             [
                 load_model_head(
-                    model=model,
+                    model=self.hparams.g_model,
                     activation_fn=self.hparams.g_activation,
                     softplus_beta=self.hparams.g_softplus_beta,
                     num_classes=self.hparams.g_num_classes,
@@ -46,7 +43,7 @@ class MultiCGR(CGR):
                     in_features=self.in_features,
                     freeze=self.hparams.g_freeze,
                 )
-                for path, model in zip(g_ckpt_path, g_model)
+                for path in g_ckpt_path
             ]
         )
 

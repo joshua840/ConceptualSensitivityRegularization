@@ -6,7 +6,6 @@ DEFAULTS="\
 --model configs/FeatureMultiCGR_stage2.yaml \
 --model.dataset waterbirds \
 --model.data_dir ${DATA_PATH} \
---model.g_model three_layer \
 --model.g_num_heads 2
 --model.cs_method dot_sq \
 --model.set_last_layer three_layer \
@@ -16,7 +15,8 @@ DEFAULTS="\
 --trainer.max_epochs 600 "
 
 
-G_PATH="/home/jj/Research/ConceptualSensitivityRegularization/.neptune/temp/TEM-654/checkpoints/last.ckpt,/home/jj/Research/ConceptualSensitivityRegularization/.neptune/temp/TEM-653/checkpoints/last.ckpt"
+G_PATH="/home/jj/Research/ConceptualSensitivityRegularization/.neptune/temp/TEM-654/checkpoints/last.ckpt,/home/jj/Research/ConceptualSensitivityRegularization/data/cavs/catdog_concepts_convnext_t_svm.pt"
+G_MODEL="three_layer,linear"
 LL=three_layer
 MR=0.0
 BS=32
@@ -25,7 +25,7 @@ SEED=1234
 MODEL_PATH='/home/jj/Research/ConceptualSensitivityRegularization/.neptune/240411WaterBirds/WAT8-37/checkpoints/last.ckpt'
 for CS_METHOD in dot_sq
 do
-CUDA_VISIBLE_DEVICES=0 python -m csr.main $DEFAULTS --seed_everything $SEED --model.minor_ratio $MR --model.batch_size_train $BS --model.learning_rate $LR --model.set_last_layer $LL --model.lamb_cs 0.1 --model.lamb_cav 0 --model.g_ckpt_path $G_PATH --model.model_path $MODEL_PATH --model.cs_method $CS_METHOD
+CUDA_VISIBLE_DEVICES=0 python -m csr.main $DEFAULTS --seed_everything $SEED --model.minor_ratio $MR --model.batch_size_train $BS --model.learning_rate $LR --model.set_last_layer $LL --model.lamb_cs 0.1 --model.lamb_cav 0 --model.g_ckpt_path $G_PATH --model.model_path $MODEL_PATH --model.cs_method $CS_METHOD --model.g_model $G_MODEL
 done
 
 

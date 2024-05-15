@@ -25,7 +25,7 @@ SEED=1234
 MODEL_PATH='/home/jj/Research/ConceptualSensitivityRegularization/.neptune/240411WaterBirds/WAT8-37/checkpoints/last.ckpt'
 for CS_METHOD in dot_sq
 do
-CUDA_VISIBLE_DEVICES=0 python -m csr.main $DEFAULTS --seed_everything $SEED --model.minor_ratio $MR --model.batch_size_train $BS --model.learning_rate $LR --model.set_last_layer $LL --model.lamb_cs 0.1 --model.lamb_cav 0 --model.g_ckpt_path $G_PATH --model.model_path $MODEL_PATH --model.cs_method $CS_METHOD --model.g_model $G_MODEL
+CUDA_VISIBLE_DEVICES=0 python -m csr.main $DEFAULTS --seed_everything $SEED --model.minor_ratio $MR --model.batch_size_train $BS --model.learning_rate $LR --model.set_last_layer $LL --model.lamb_cs_list "1e-3,1e-1" --model.lamb_cav 0 --model.g_ckpt_path $G_PATH --model.model_path $MODEL_PATH --model.cs_method $CS_METHOD --model.g_model $G_MODEL
 done
 
 

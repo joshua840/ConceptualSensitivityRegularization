@@ -4,16 +4,16 @@ from . import CGR
 
 
 def str2list(s: str):
-    return [x for x in s.split(",")]
+    return [float(x) for x in s.split(",")]
 
 
 class MultiCGR(CGR):
     def __init__(
         self,
+        lamb_cs_list: str,
         g_num_heads: int,
         g_ckpt_path: str,
         g_model: str = "linear",
-        lamb_cs: float = 1,
         **kwargs,
     ):
         """
@@ -51,6 +51,7 @@ class MultiCGR(CGR):
         )
 
     def classifier_step(self, data, mode):
+        lamb_cs_list = str2list(self.hparams.lamb_cs_list)
         x, y, g, i = data
 
         x.requires_grad = True if mode == "train" else False
@@ -62,7 +63,7 @@ class MultiCGR(CGR):
 
         g_logit_list = [g_head(x) for g_head in self.model_g]
 
-        if self.hparams.lamb_cs > 0 and mode == "train":
+        if sum(lamb_cs_list) > 0 and mode == "train":
             # conceptual sensitivity
             if self.hparams.criterion == "bce":
                 logit_c = y_hat * (-2 * y.float().unsqueeze(1) + 1)
@@ -120,12 +121,10 @@ class MultiCGR(CGR):
 
                 if self.hparams.cs_method == "cross_dot_sq":
                     # cs_loss = (concept_gradient.square() * feature_distance).mean()
-                    cs_loss = sum(
-                        [
-                            (concept_gradient.square() * feature_distance).mean()
-                            for concept_gradient in concept_gradient_list
-                        ]
-                    )
+                    cs_loss_list = [
+                        (concept_gradient.square() * feature_distance).mean()
+                        for concept_gradient in concept_gradient_list
+                    ]
 
             else:
                 # concept_gradient = torch.einsum("nc,nc->n", grad_h, grad_g)
@@ -135,20 +134,18 @@ class MultiCGR(CGR):
 
                 if self.hparams.cs_method == "dot_sq":
                     # cs_loss = concept_gradient.square().mean()
-                    cs_loss = sum(
-                        [
-                            concept_gradient.square().mean()
-                            for concept_gradient in concept_gradient_list
-                        ]
-                    )
+                    cs_loss_list = [
+                        concept_gradient.square().mean()
+                        for concept_gradient in concept_gradient_list
+                    ]
+
                 elif self.hparams.cs_method == "dot_abs":
                     # cs_loss = concept_gradient.abs().mean()
-                    cs_loss = sum(
-                        [
-                            concept_gradient.abs().mean()
-                            for concept_gradient in concept_gradient_list
-                        ]
-                    )
+                    cs_loss_list = [
+                        concept_gradient.abs().mean()
+                        for concept_gradient in concept_gradient_list
+                    ]
+
                 else:
                     # concept_gradient = concept_gradient / (
                     #     (
@@ -172,30 +169,30 @@ class MultiCGR(CGR):
                     ]
                     if self.hparams.cs_method == "cosine_sq":
                         # cs_loss = concept_gradient.square().mean()
-                        cs_loss = sum(
-                            [
-                                concept_gradient.square().mean()
-                                for concept_gradient in concept_gradient_list
-                            ]
-                        )
+                        cs_loss_list = [
+                            concept_gradient.square().mean()
+                            for concept_gradient in concept_gradient_list
+                        ]
+
                     elif self.hparams.cs_method == "cosine_abs":
                         # cs_loss = concept_gradient.abs().mean()
-                        cs_loss = sum(
-                            [
-                                concept_gradient.abs().mean()
-                                for concept_gradient in concept_gradient_list
-                            ]
-                        )
+                        cs_loss_list = [
+                            concept_gradient.abs().mean()
+                            for concept_gradient in concept_gradient_list
+                        ]
+
                     elif self.hparams.cs_method == "cosine_log":
                         # cs_loss = torch.log((1 - concept_gradient.abs()) + 1e-7).mean()
-                        cs_loss = sum(
-                            [
-                                torch.log((1 - concept_gradient.abs()) + 1e-7).mean()
-                                for concept_gradient in concept_gradient_list
-                            ]
-                        )
+                        cs_loss_list = [
+                            torch.log((1 - concept_gradient.abs()) + 1e-7).mean()
+                            for concept_gradient in concept_gradient_list
+                        ]
+            weighted_cs_loss_list = [
+                lamb_cs * cs_loss
+                for lamb_cs, cs_loss in zip(lamb_cs_list, cs_loss_list)
+            ]
 
-            loss = ce_loss + self.hparams.lamb_cs * cs_loss
+            loss = ce_loss + sum(weighted_cs_loss_list)
 
         acc = self.metric.get_accuracy(y_hat, y, criterion=self.hparams.criterion)
         self.log_dict(

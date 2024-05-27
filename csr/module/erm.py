@@ -223,7 +223,7 @@ class ERM(DataModule):
                     sync_dist=False,
                     add_dataloader_idx=False,
                 )
-        worst_acc = min(acc_dict.values())
+        worst_acc = min([i for i in acc_dict.values() if i != 0])
         self.log_dict({f"{mode}_worst_acc": worst_acc})
 
         class_acc_list = []

@@ -17,14 +17,14 @@ DEFAULTS="\
 
 for LL in three_layer
 do
-for BS in 16
+for BS in 4 16
 do
 for SEED in 1234
 do
-for LR in 1e-3
+for LR in 1e-3 3e-3
 do
 CUDA_VISIBLE_DEVICES=0 python -m csr.main $DEFAULTS \
- --seed_everything $SEED --model.batch_size_train $BS --model.learning_rate $LR --model.set_last_layer $LL --model.lamb_cs 1 --model.lamb_cav 1
+ --seed_everything $SEED --model.batch_size_train $BS --model.learning_rate $LR --model.set_last_layer $LL --model.lamb_cs 0 --model.lamb_cav 1 &
 done
 done
 done

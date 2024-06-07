@@ -1,7 +1,7 @@
 export NEPTUNE_API_TOKEN="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiJhYTBjMGNjYS01MjI1LTQxZjgtYmRlZS1jMmYwYzgxNDE5ODEifQ=="
 
 WORKSPACE_NAME="SmoothAttributionPrior"
-PROJECT_NAME="temp"
+PROJECT_NAME="ConceptModels"
 DATA_PATH='/media/disk2/Data'
 DEFAULTS="\
 --model configs/FeatureCGR_stage1.yaml \
@@ -17,14 +17,14 @@ DEFAULTS="\
 
 for LL in three_layer
 do
-for BS in 16
+for BS in 4 16
 do
 for SEED in 1234
 do
-for LR in 1e-3
+for LR in 1e-3 3e-3
 do
 CUDA_VISIBLE_DEVICES=0 python -m csr.main $DEFAULTS \
- --seed_everything $SEED --model.batch_size_train $BS --model.learning_rate $LR --model.set_last_layer $LL --model.lamb_cs 1 --model.lamb_cav 1
+ --seed_everything $SEED --model.batch_size_train $BS --model.learning_rate $LR --model.set_last_layer $LL --model.lamb_cs 0 --model.lamb_cav 1 &
 done
 done
 done

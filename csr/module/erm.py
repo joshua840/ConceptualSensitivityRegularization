@@ -203,6 +203,8 @@ class ERM(DataModule):
             for a_idx in range(self.hparams.num_attributes):
                 mask = (y == y_idx) & (g == a_idx)
                 if mask.sum() == 0:
+                    acc_dict[(y_idx, a_idx)] = 0
+                    len_dict[(y_idx, a_idx)] = 0
                     continue
 
                 if y_idx == 0:
@@ -221,7 +223,13 @@ class ERM(DataModule):
                     sync_dist=False,
                     add_dataloader_idx=False,
                 )
-        worst_acc = min(acc_dict.values())
+
+        # worst_acc = min([i for i in acc_dict.values() if i != 0])
+        # worst acc should collect the minimun value among the non-zero length
+        worst_acc = min(
+            [acc for acc, len in zip(acc_dict.values(), len_dict.values()) if len != 0]
+        )
+
         self.log_dict({f"{mode}_worst_acc": worst_acc})
 
         class_acc_list = []
@@ -229,11 +237,14 @@ class ERM(DataModule):
             acc = 0
             for a_idx in range(self.hparams.num_attributes):
                 acc += acc_dict[(y_idx, a_idx)] * len_dict[(y_idx, a_idx)]
-            acc /= sum(
-                [
-                    len_dict[(y_idx, a_idx)]
-                    for a_idx in range(self.hparams.num_attributes)
-                ]
+            acc /= max(
+                sum(
+                    [
+                        len_dict[(y_idx, a_idx)]
+                        for a_idx in range(self.hparams.num_attributes)
+                    ]
+                ),
+                1,
             )
             class_acc_list.append(acc)
             self.log(

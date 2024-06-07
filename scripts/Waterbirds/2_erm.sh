@@ -1,10 +1,11 @@
 WORKSPACE_NAME="SmoothAttributionPrior"
 PROJECT_NAME="2404011WaterBirds"
 PROJECT_NAME="temp"
+PROJECT_NAME="240516WaterBrids"
 
-DATA_PATH='/home/data'
+DATA_PATH='/media/disk2/Data'
 YAMLS="--model configs/FeatureERM.yaml --trainer configs/trainer.yaml "
-TRAINER="--trainer.logger.project ${WORKSPACE_NAME}/${PROJECT_NAME} --trainer.logger.name ${PROJECT_NAME} --trainer.max_epochs 100 "
+TRAINER="--trainer.logger.project ${WORKSPACE_NAME}/${PROJECT_NAME} --trainer.logger.name ${PROJECT_NAME} --trainer.max_epochs 300 "
 MODEL="--model.dataset waterbirds --model.data_dir ${DATA_PATH} --model.input_type feature "
 
 
@@ -29,7 +30,7 @@ MODEL="--model.dataset waterbirds --model.data_dir ${DATA_PATH} --model.input_ty
 
 
 
-for LL in three_layer linear
+for LL in three_layer
 do
 for WD in 1e-2
 do

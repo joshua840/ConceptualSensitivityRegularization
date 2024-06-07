@@ -1,6 +1,7 @@
 ####################################### Debug run - ERM feature ####################################
 WORKSPACE_NAME="SmoothAttributionPrior"
-PROJECT_NAME="240401CatDog"
+# PROJECT_NAME="240401CatDog"
+PROJECT_NAME="240516CatDog"
 DATA_PATH="/media/disk2/Data/"
 YAMLS="--model configs/FeatureERM.yaml --trainer configs/trainer.yaml "
 TRAINER="--trainer.logger.project ${WORKSPACE_NAME}/${PROJECT_NAME} --trainer.logger.name ${PROJECT_NAME} --trainer.max_epochs 600 "

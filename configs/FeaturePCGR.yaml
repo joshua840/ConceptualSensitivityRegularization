@@ -43,3 +43,5 @@ init_args:
   g_softplus_beta: 10
   g_freeze: True
   g_ckpt_path: null # required
+  # PERM
+  proj_cav_ckpt_path: null

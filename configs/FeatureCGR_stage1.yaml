@@ -1,0 +1,45 @@
+class_path: csr.module.CGR
+init_args:
+  # DataModule
+  dataset: null #required
+  data_type: feature
+  data_dir: null # required
+  data_seed: 1234
+  num_workers: 2
+  batch_size_train: 32
+  batch_size_test: 100
+  minor_ratio: 0.05
+  subsample_what: null
+  upsample_count: null
+  upsample_indices_path: null
+  # ERM
+  model: convnext_t
+  input_type: "feature"
+  imagenet_pretrained: True
+  model_path: null
+  freeze_model: True
+  freezing_target_layer: classifier.2
+  set_last_layer: null # required
+  del_backbone: True
+  h_activation_fn: softplus
+  h_softplus_beta: 10
+  learning_rate: 1e-3
+  scheduler: cosineannealing
+  milestones: [9999]
+  weight_decay: 1e-2
+  optimizer: adamw
+  criterion: bce
+  # CGR
+  cgr_stage: stage1 # required
+  lamb_cs: 1
+  lamb_cav: 1
+  cs_method: dot_sq
+  grad_from: logit
+  target_layer: classifier.1
+  g_model: null # required
+  g_num_classes: 1
+  g_criterion: bce
+  g_activation: softplus
+  g_softplus_beta: 10
+  g_freeze: False
+  g_ckpt_path: null

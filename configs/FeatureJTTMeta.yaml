@@ -1,0 +1,31 @@
+class_path: module.JTTMetadataGenerator
+init_args:
+  # DataModule
+  dataset: null #required
+  data_type: null #required
+  data_dir: /data
+  data_seed: 1234
+  num_workers: 2
+  batch_size_train: 32
+  batch_size_test: 100
+  minor_ratio: 0.05
+  subsample_what: null
+  upsample_count: null
+  upsample_indices_path: null
+  # ERM
+  model: convnext_t
+  input_type: "feature"
+  imagenet_pretrained: True
+  model_path: null
+  freeze_model: True
+  freezing_target_layer: classifier.2
+  set_last_layer: linear
+  del_backbone: True
+  h_activation_fn: softplus
+  h_softplus_beta: 10
+  learning_rate: 1e-3
+  scheduler: multistep
+  milestones: [9999]
+  weight_decay: 1e-2
+  optimizer: adamw
+  criterion: bce

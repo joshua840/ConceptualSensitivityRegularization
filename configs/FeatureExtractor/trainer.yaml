@@ -1,0 +1,19 @@
+accelerator: gpu
+devices: 1
+precision: 32-true
+max_epochs: 1000
+log_every_n_steps: 99999
+check_val_every_n_epoch: 1000
+inference_mode: false
+reload_dataloaders_every_n_epochs: 99999
+num_sanity_val_steps: -1
+logger:
+  class_path: lightning.pytorch.loggers.neptune.NeptuneLogger
+  init_args:
+    api_key: null # required
+    project: null # required
+    log_model_checkpoints: false
+    name: null # required
+  dict_kwargs:
+    capture_stdout: false
+
